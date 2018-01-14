@@ -1,7 +1,11 @@
 .idea/
-.iml
+SummarizeWordNet.iml
+
+target/
 
 output_per_tag.tsv
 summarization_result.tsv
 summary_by_count.tsv
 summary_by_weight.tsv
+
+config.properties
