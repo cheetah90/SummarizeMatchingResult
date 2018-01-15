@@ -4,6 +4,7 @@ SummarizeWordNet.iml
 target/
 
 output_per_tag.tsv
+output_per_img.tsv
 summarization_result.tsv
 summary_by_count.tsv
 summary_by_weight.tsv

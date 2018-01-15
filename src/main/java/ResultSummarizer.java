@@ -268,8 +268,6 @@ public class ResultSummarizer {
                     } else {
                         processTagRecursively(tag, 1.0);
                     }
-
-
                 } catch (Exception exception) {
                     logger.error("Error parsing line: " + line);
                 }
