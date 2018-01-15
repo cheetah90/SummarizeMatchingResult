@@ -150,6 +150,11 @@ public class ResultSummarizer {
     }
 
     private void processTag(String tag, Double weight) {
+        // Hack to deal with the number inconsistencies of wordnet_postage. Fixed in MatchYago
+        if (tag.startsWith("<wordnet_postage")) {
+            tag = "<wordnet_postage_106796119>";
+        }
+
         if (yagoEntities2Types.get(tag) == null) {
             logger.error("Error - tag does not exist: " + tag);
             return;
