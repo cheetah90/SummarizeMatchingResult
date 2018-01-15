@@ -34,7 +34,9 @@ public class ResultSummarizer {
         return (typeInfo != null &&
                 !typeInfo.contains("wikicat_Abbreviations")
                 && !typeInfo.contains("wordnet_first_name")
-                && !typeInfo.contains("wordnet_surname"));
+                && !typeInfo.contains("wordnet_surname")
+                && !typeInfo.contains("owl:Thing")
+        );
     }
 
     private void loadEnWikiResultSet(ResultSet rs) throws SQLException {
