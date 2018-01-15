@@ -4,8 +4,6 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ResultSummarizer {
 
@@ -149,10 +147,15 @@ public class ResultSummarizer {
         return object.startsWith("<wordnet_");
     }
 
-    private void processTag(String tag, Double weight) {
+    private void processTagRecursively(String tag, Double weight) {
         // Hack to deal with the number inconsistencies of wordnet_postage. Fixed in MatchYago
         if (tag.startsWith("<wordnet_postage")) {
             tag = "<wordnet_postage_106796119>";
+        }
+
+        // if it's too short, it's often unmeaningful
+        if (tag.length() < 3) {
+            return;
         }
 
         if (yagoEntities2Types.get(tag) == null) {
@@ -160,11 +163,10 @@ public class ResultSummarizer {
             return;
         }
 
-        // Handle redirect
+        // If not, then recursively check its object
         HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
         List<String> objectsList = new ArrayList<>(objectsHashSet);
         int size_of_objectsList = objectsList.size();
-
 
 
         // If this is a redirect, process the original tag
@@ -187,7 +189,7 @@ public class ResultSummarizer {
                     summarizationWeight.put(object, currentWeight+ weight/size_of_objectsList);
                 }
             } else {
-                processTag(object, weight/size_of_objectsList);
+                processTagRecursively(object, weight/size_of_objectsList);
             }
         }
 
@@ -245,7 +247,29 @@ public class ResultSummarizer {
             while ((line = br.readLine()) != null) {
                 try {
                     String tag = line.split("\t")[2];
-                    processTag(tag, 1.0);
+
+                    // If this is a wordnet synset already
+                    if (isWordNetSynset(tag)) {
+                        // Update the summarizationCount
+                        if (summarizationCount.get(tag) == null) {
+                            summarizationCount.put(tag, 1);
+                        } else {
+                            int currentCount = summarizationCount.get(tag);
+                            summarizationCount.put(tag, currentCount+1);
+                        }
+
+                        // Update summarizationWeight
+                        if (summarizationWeight.get(tag) == null) {
+                            summarizationWeight.put(tag, 1.0);
+                        } else {
+                            double currentWeight = summarizationWeight.get(tag);
+                            summarizationWeight.put(tag, currentWeight+ 1.0);
+                        }
+                    } else {
+                        processTagRecursively(tag, 1.0);
+                    }
+
+
                 } catch (Exception exception) {
                     logger.error("Error parsing line: " + line);
                 }
