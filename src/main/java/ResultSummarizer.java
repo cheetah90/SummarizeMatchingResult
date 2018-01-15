@@ -36,7 +36,7 @@ public class ResultSummarizer {
                 && !typeInfo.contains("wordnet_first_name")
                 && !typeInfo.contains("wordnet_surname")
                 && !typeInfo.contains("owl:Thing")
-                && !typeInfo.contains("<yagoLegalActorGeo>")
+                && !typeInfo.startsWith("<yago")
         );
     }
 
