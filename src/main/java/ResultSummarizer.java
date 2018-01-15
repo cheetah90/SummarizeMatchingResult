@@ -17,6 +17,8 @@ public class ResultSummarizer {
 
     private final static HashMap<String, Integer> summarizationCount = new HashMap<>();
 
+    private HashSet<String> synSetforImage = new HashSet<>();
+
     private ResultSummarizer(){
         try {
             //Load properties file
@@ -135,12 +137,15 @@ public class ResultSummarizer {
 
         // If this is a wordnet, then update the summarization results
         if (isWordNetSynset(tag)) {
-            // Update the summarizationCount
-            if (summarizationCount.get(tag) == null) {
-                summarizationCount.put(tag, 1);
-            } else {
-                int currentCount = summarizationCount.get(tag);
-                summarizationCount.put(tag, currentCount+1);
+            // If a new synset, add the count
+            if (!synSetforImage.contains(tag)) {
+                // Update the summarizationCount
+                if (summarizationCount.get(tag) == null) {
+                    summarizationCount.put(tag, 1);
+                } else {
+                    int currentCount = summarizationCount.get(tag);
+                    summarizationCount.put(tag, currentCount+1);
+                }
             }
 
             // Update summarizationWeight
@@ -150,6 +155,11 @@ public class ResultSummarizer {
                 double currentWeight = summarizationWeight.get(tag);
                 summarizationWeight.put(tag, currentWeight+ weight);
             }
+
+            // Add this synset to hash set
+            synSetforImage.add(tag);
+
+
         } else {
             // If not, then recursively check its object
             HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
@@ -268,6 +278,8 @@ public class ResultSummarizer {
             String line;
 
             while ((line = br.readLine()) != null) {
+                synSetforImage.clear();
+
                 String tagsLine = line.split("\t")[2];
                 tagsLine = tagsLine.substring(1,tagsLine.length()-1);
 
