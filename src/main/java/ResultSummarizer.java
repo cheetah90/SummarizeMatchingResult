@@ -33,8 +33,6 @@ public class ResultSummarizer {
                 !typeInfo.contains("wikicat_Abbreviations")
                 && !typeInfo.contains("wordnet_first_name")
                 && !typeInfo.contains("wordnet_surname")
-                && !typeInfo.contains("owl:Thing")
-                && !typeInfo.startsWith("<yago")
         );
     }
 
@@ -125,74 +123,41 @@ public class ResultSummarizer {
         }
     }
 
-    private int getLineNumberofFile(String file_ImageNames) {
-        try {
-            Process p = Runtime.getRuntime().exec("wc -l " + file_ImageNames);
-            p.waitFor();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-            String line = reader.readLine();
-            return Integer.parseInt(line.trim().split(" ")[0]);
-
-        } catch (Exception exception) {
-            exception.printStackTrace();
-        }
-
-        return 0;
-
-    }
-
     private boolean isWordNetSynset(String object) {
         return object.startsWith("<wordnet_");
     }
 
-    private void processTagRecursively(String tag, Double weight) {
+    private void processOneTag(String tag, Double weight) {
         // Hack to deal with the number inconsistencies of wordnet_postage. Fixed in MatchYago
         if (tag.startsWith("<wordnet_postage")) {
             tag = "<wordnet_postage_106796119>";
         }
 
-        // if it's too short, it's often unmeaningful
-        if (tag.length() < 3) {
-            return;
-        }
-
-        if (yagoEntities2Types.get(tag) == null) {
-            logger.error("Error - tag does not exist: " + tag);
-            return;
-        }
-
-        // If not, then recursively check its object
-        HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
-        List<String> objectsList = new ArrayList<>(objectsHashSet);
-        int size_of_objectsList = objectsList.size();
-
-
-        // If this is a redirect, process the original tag
-        for (String object: objectsList) {
-            // If this is a wordnet, then update the summarization results
-            if (isWordNetSynset(object)) {
-                // Update the summarizationCount
-                if (summarizationCount.get(object) == null) {
-                    summarizationCount.put(object, 1);
-                } else {
-                    int currentCount = summarizationCount.get(object);
-                    summarizationCount.put(object, currentCount+1);
-                }
-
-                // Update summarizationWeight
-                if (summarizationWeight.get(object) == null) {
-                    summarizationWeight.put(object, weight/size_of_objectsList);
-                } else {
-                    double currentWeight = summarizationWeight.get(object);
-                    summarizationWeight.put(object, currentWeight+ weight/size_of_objectsList);
-                }
+        // If this is a wordnet, then update the summarization results
+        if (isWordNetSynset(tag)) {
+            // Update the summarizationCount
+            if (summarizationCount.get(tag) == null) {
+                summarizationCount.put(tag, 1);
             } else {
-                processTagRecursively(object, weight/size_of_objectsList);
+                int currentCount = summarizationCount.get(tag);
+                summarizationCount.put(tag, currentCount+1);
             }
-        }
 
+            // Update summarizationWeight
+            if (summarizationWeight.get(tag) == null) {
+                summarizationWeight.put(tag, weight);
+            } else {
+                double currentWeight = summarizationWeight.get(tag);
+                summarizationWeight.put(tag, currentWeight+ weight);
+            }
+        } else {
+            // If not, then recursively check its object
+            HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
+            List<String> objectsList = new ArrayList<>(objectsHashSet);
+
+            // If not, then process each of its object
+            processTagsRecursively(objectsList, weight);
+        }
 
     }
 
@@ -231,13 +196,71 @@ public class ResultSummarizer {
         writeHashMaptoFile(summarizationWeight, "./summary_by_weight.tsv");
     }
 
+    private boolean isValidTag(String tag) {
+        // if it's too short, it's often unmeaningful
+        if (tag.length() < 3) {
+            return false;
+        }
+
+
+        if (yagoEntities2Types.get(tag) == null) {
+            logger.error("Error - tag does not exist: " + tag);
+            return false;
+        }
+
+        return true;
+
+    }
+
+    private List<String> parseTagsofImage(String strLine) {
+        ArrayList<String> tagsList = new ArrayList<>();
+
+        String[] tagsParsed = strLine.split(">, <");
+        for (String tag: tagsParsed) {
+            if (!tag.startsWith("<")) {
+                tag = "<" + tag;
+            }
+
+            if (!tag.endsWith(">")) {
+                tag = tag + ">";
+            }
+
+            tagsList.add(tag);
+        }
+
+        return tagsList;
+    }
+
+    private List<String> filterAllTags(List<String> tagsArray){
+        ArrayList<String> validTags = new ArrayList<>();
+
+        for (String tag: tagsArray) {
+            if (isValidTag(tag)) {
+                validTags.add(tag);
+            }
+        }
+
+        return validTags;
+    }
+
+    private void processTagsRecursively(List<String> tagsArray, double sum_of_weights) {
+        // Filter invalid tags
+        List<String> validTagsArray = filterAllTags(tagsArray);
+
+        // Process each tag
+        for (String tag: validTagsArray) {
+            // If not, then process each of its object
+            processOneTag(tag, sum_of_weights/(double) validTagsArray.size());
+        }
+
+    }
+
+
     private void startSummarization(){
-
-
         // Create ThreadPool
         //ExecutorService pool = Executors.newFixedThreadPool(Integer.parseInt(PROPERTIES.getProperty("maxThreadPool")));
 
-        String fileInput = "./output_per_tag.tsv";
+        String fileInput = "./output_per_img.tsv";
 
         try {
             // Buffered read the file
@@ -245,32 +268,13 @@ public class ResultSummarizer {
             String line;
 
             while ((line = br.readLine()) != null) {
-                try {
-                    String tag = line.split("\t")[2];
+                String tagsLine = line.split("\t")[2];
+                tagsLine = tagsLine.substring(1,tagsLine.length()-1);
 
-                    // If this is a wordnet synset already
-                    if (isWordNetSynset(tag)) {
-                        // Update the summarizationCount
-                        if (summarizationCount.get(tag) == null) {
-                            summarizationCount.put(tag, 1);
-                        } else {
-                            int currentCount = summarizationCount.get(tag);
-                            summarizationCount.put(tag, currentCount+1);
-                        }
+                List<String> tagsArray = parseTagsofImage(tagsLine);
 
-                        // Update summarizationWeight
-                        if (summarizationWeight.get(tag) == null) {
-                            summarizationWeight.put(tag, 1.0);
-                        } else {
-                            double currentWeight = summarizationWeight.get(tag);
-                            summarizationWeight.put(tag, currentWeight+ 1.0);
-                        }
-                    } else {
-                        processTagRecursively(tag, 1.0);
-                    }
-                } catch (Exception exception) {
-                    logger.error("Error parsing line: " + line);
-                }
+                processTagsRecursively(tagsArray, 1.0);
+
             }
         } catch (Exception exception) {
             logger.error("filenames.txt does not exist!");
