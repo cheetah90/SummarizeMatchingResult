@@ -3,6 +3,11 @@ SummarizeWordNet.iml
 
 target/
 
+# results files
+logs.log
+context-location-tags.txt
+context-time-tags.txt
+
 output_per_tag.tsv
 output_per_img.tsv
 summarization_result.tsv
