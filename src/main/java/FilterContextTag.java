@@ -167,6 +167,16 @@ public class FilterContextTag {
     }
 
     private String typeOfTag(String tag) {
+        if (tag.equals("<wordnet_calendar_month_115209413>")
+                || tag.equals("<wordnet_year_115203791>")){
+            return "context-time";
+        }
+
+        if (tag.equals("<wordnet_administrative_district_108491826>")
+                || tag.startsWith("<wikicat_Populated_places")){
+            return "context-location";
+        }
+
         HashSet<String> hypernymSet = yagoEntities2Types.get(tag);
 
         if (hypernymSet!=null) {
@@ -175,27 +185,16 @@ public class FilterContextTag {
             List<String> hypernymsList = new ArrayList<>(hypernymSet);
             HashSet<String> typesofHypernyms = new HashSet<>();
             for (String hypernym: hypernymsList) {
-                if (hypernym.equals("<wordnet_calendar_month_115209413>")
-                        || hypernym.equals("<wordnet_year_115203791>")){
-                    return "context-time";
-                }
-
-                if (hypernym.equals("<wordnet_administrative_district_108491826>")
-                        || hypernym.startsWith("<wikicat_Populated_places")){
-                    return "context-location";
-                }
-
                 typesofHypernyms.add(typeOfTag(hypernym));
             }
 
-            if (typesofHypernyms.contains("context-location")) {
+            if (typesofHypernyms.size()==1 && typesofHypernyms.contains("context-location")) {
                 return "context-location";
-            } else if (typesofHypernyms.contains("context-time")) {
+            } else if (typesofHypernyms.size()==1 && typesofHypernyms.contains("context-time")) {
                 return "context-time";
             }
 
         }
-
         return "content";
 
     }
