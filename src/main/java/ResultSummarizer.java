@@ -17,6 +17,8 @@ public class ResultSummarizer {
 
     private final static HashMap<String, Integer> summarizationCount = new HashMap<>();
 
+    private final static HashSet<String> contextTags = new HashSet<>();
+
     private HashSet<String> synSetforImage = new HashSet<>();
 
     private ResultSummarizer(){
@@ -28,6 +30,37 @@ public class ResultSummarizer {
         }
 
         loadYagotoMemory();
+
+        loadContextTagstoMemory();
+    }
+
+    private void loadContextTagstoMemory(){
+        String line;
+        String fileName="";
+
+        try {
+            // Read context-location tags
+            fileName = "./context-location-tags.txt";
+            BufferedReader br = new BufferedReader(new FileReader(fileName));
+
+            while ((line = br.readLine()) != null) {
+                // process the line.
+                contextTags.add(line);
+            }
+
+
+            // Read context-time tags
+            fileName = "./context-time-tags.txt";
+            br = new BufferedReader(new FileReader(fileName));
+            while ((line = br.readLine()) != null) {
+                // process the line.
+                contextTags.add(line);
+            }
+
+        } catch (IOException exception) {
+            logger.error("Error: failed to read a line from " + fileName);
+            exception.printStackTrace();
+        }
     }
 
     private boolean isValidObject(String typeInfo) {
@@ -212,9 +245,14 @@ public class ResultSummarizer {
             return false;
         }
 
-
+        // If it does not exist, it's a bad
         if (yagoEntities2Types.get(tag) == null) {
             logger.error("Error - tag does not exist: " + tag);
+            return false;
+        }
+
+        // If it's a context tag, it's bad
+        if (!contextTags.contains(tag)) {
             return false;
         }
 
