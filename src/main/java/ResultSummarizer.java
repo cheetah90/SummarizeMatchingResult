@@ -252,7 +252,7 @@ public class ResultSummarizer {
         }
 
         // If it's a context tag, it's bad
-        if (!contextTags.contains(tag)) {
+        if (contextTags.contains(tag)) {
             return false;
         }
 
