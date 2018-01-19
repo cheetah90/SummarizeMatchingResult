@@ -89,21 +89,6 @@ public class ResultSummarizer {
                 }
 
                 if (PROPERTIES.getProperty("debugLocally").equals("true")) {
-                    HashSet<String> hashSet = new HashSet<>();
-                    hashSet.add("<wikicat_Polish_people>");
-                    hashSet.add("<wordnet_canoeist_109891470>");
-                    yagoEntities2Types.put("<wikicat_Polish_canoeists>", hashSet);
-
-
-                    HashSet<String> hashSet1 = new HashSet<>();
-                    hashSet1.add("<Traffic_sign>");
-                    yagoEntities2Types.put("<Highway_sign>", hashSet1);
-
-                    HashSet<String> hashSet2 = new HashSet<>();
-                    hashSet2.add("<wikicat_Color_codes>");
-                    hashSet2.add("<wikicat_Traffic_signs>");
-                    hashSet2.add("<wikicat_Symbols>");
-                    yagoEntities2Types.put("<Traffic_sign>", hashSet2);
 
                     HashSet<String> hashSet3 = new HashSet<>();
                     hashSet3.add("<wordnet_person_100007846>");
@@ -300,6 +285,8 @@ public class ResultSummarizer {
             // If not, then process each of its object
             processOneTag(tag, sum_of_weights/(double) validTagsArray.size());
         }
+
+        System.out.println("Valid tags are :" + validTagsArray.toString() + " sum of weights is: " + sum_of_weights);
 
     }
 
