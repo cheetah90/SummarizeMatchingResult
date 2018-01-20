@@ -281,21 +281,16 @@ public class FilterContextTag {
 
 
                 String typeOfCurrentTag;
-                if (tag.equals("<August_2004>")) {
+                if (tag.equals("<2004>")) {
                     typeOfCurrentTag = typeOfTag(tag, true);
                 } else {
                     typeOfCurrentTag = typeOfTag(tag, false);
                 }
 
-                
+
                 switch (typeOfCurrentTag) {
                     case "context-time": {
                         contextTimeTags.add(tag);
-                        //DEBUG:
-                        if (tag.equals("<August_2004>")) {
-                            System.out.println("<August_2004> is a context-time tag");
-                        }
-
                         break;
                     }
                     case "context-location": {
