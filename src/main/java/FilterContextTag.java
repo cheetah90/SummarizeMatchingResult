@@ -168,12 +168,12 @@ public class FilterContextTag {
 
     private String typeOfTag(String tag, boolean needPrint) {
         if (tag.equals("<wordnet_calendar_month_115209413>")
-                || tag.equals("<wordnet_year_115203791>")){
+                || tag.equals("<wordnet_year_115203791>") || contextTimeTags.contains(tag)){
             return "context-time";
         }
 
         if (tag.equals("<wordnet_administrative_district_108491826>")
-                || tag.startsWith("<wikicat_Populated_places")){
+                || tag.startsWith("<wikicat_Populated_places") || contextLocationTags.contains(tag)){
             return "context-location";
         }
 
@@ -251,20 +251,16 @@ public class FilterContextTag {
     }
 
     private void startFiltering(){
+        Set<String> keySet= yagoEntities2Types.keySet();
 
-        Iterator it = yagoEntities2Types.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            String tag = (String) pair.getKey();
-
-
+        for (String tag: keySet)
+        {
             String typeOfCurrentTag;
-            if (tag.equals("<2014>")) {
+            if (tag.equals("<August_2014>")) {
                 typeOfCurrentTag = typeOfTag(tag, true);
             } else {
                 typeOfCurrentTag = typeOfTag(tag, false);
             }
-
 
             switch (typeOfCurrentTag) {
                 case "context-time": {
@@ -276,7 +272,6 @@ public class FilterContextTag {
                     break;
                 }
             }
-            it.remove();
         }
 
         writeHashSettoFile(contextTimeTags, "./context-time-tags.txt");
