@@ -176,7 +176,7 @@ public class FilterContextTag {
         }
     }
 
-    private String typeOfTag(String tag) {
+    private String typeOfTag(String tag, boolean needPrint) {
         if (tag.equals("<wordnet_calendar_month_115209413>")
                 || tag.equals("<wordnet_year_115203791>")){
             return "context-time";
@@ -189,8 +189,8 @@ public class FilterContextTag {
 
         HashSet<String> hypernymSet = yagoEntities2Types.get(tag);
 
-        if (tag.equals("<August_2014>")){
-            System.out.println("<August_2014>'s hyperhymSet is: " + hypernymSet.toString());
+        if (needPrint){
+            System.out.println(tag + "'s hyperhymSet is: " + hypernymSet.toString());
         }
 
         if (hypernymSet!=null) {
@@ -199,10 +199,10 @@ public class FilterContextTag {
             List<String> hypernymsList = new ArrayList<>(hypernymSet);
             HashSet<String> typesofHypernyms = new HashSet<>();
             for (String hypernym: hypernymsList) {
-                typesofHypernyms.add(typeOfTag(hypernym));
+                typesofHypernyms.add(typeOfTag(hypernym, needPrint));
             }
 
-            if (tag.equals("<August_2014>")) {
+            if (needPrint) {
                 System.out.println("Tag= "+ tag + "| Its hypernyms are: " + typesofHypernyms.toString());
             }
 
@@ -262,7 +262,7 @@ public class FilterContextTag {
             sampleTags.add("<August_2004>");
 
             for (String tag: sampleTags) {
-                switch (typeOfTag(tag)) {
+                switch (typeOfTag(tag, true)) {
                     case "context-time": {
                         contextTimeTags.add(tag);
                         break;
@@ -278,11 +278,17 @@ public class FilterContextTag {
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
                 String tag = (String) pair.getKey();
-                //DEBUG:
+
+
+                String typeOfCurrentTag;
                 if (tag.equals("<August_2004>")) {
-                    System.out.println("<August_2004> is examined");
+                    typeOfCurrentTag = typeOfTag(tag, true);
+                } else {
+                    typeOfCurrentTag = typeOfTag(tag, false);
                 }
-                switch (typeOfTag(tag)) {
+
+                
+                switch (typeOfCurrentTag) {
                     case "context-time": {
                         contextTimeTags.add(tag);
                         //DEBUG:
