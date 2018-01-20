@@ -251,53 +251,33 @@ public class FilterContextTag {
     }
 
     private void startFiltering(){
-        if (PROPERTIES.getProperty("debugOnServer").equals("true")) {
-            List<String> sampleTags = new ArrayList<>();
-            sampleTags.add("<2004>");
-            sampleTags.add("<August_2004>");
 
-            for (String tag: sampleTags) {
-                switch (typeOfTag(tag, true)) {
-                    case "context-time": {
-                        contextTimeTags.add(tag);
-                        break;
-                    }
-                    case "context-location": {
-                        contextLocationTags.add(tag);
-                        break;
-                    }
+        Iterator it = yagoEntities2Types.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            String tag = (String) pair.getKey();
+
+
+            String typeOfCurrentTag;
+            if (tag.equals("<August_2014>")) {
+                typeOfCurrentTag = typeOfTag(tag, true);
+            } else {
+                typeOfCurrentTag = typeOfTag(tag, false);
+            }
+
+
+            switch (typeOfCurrentTag) {
+                case "context-time": {
+                    contextTimeTags.add(tag);
+                    break;
+                }
+                case "context-location": {
+                    contextLocationTags.add(tag);
+                    break;
                 }
             }
-        } else {
-            Iterator it = yagoEntities2Types.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
-                String tag = (String) pair.getKey();
-
-
-                String typeOfCurrentTag;
-                if (tag.equals("<2004>")) {
-                    typeOfCurrentTag = typeOfTag(tag, true);
-                } else {
-                    typeOfCurrentTag = typeOfTag(tag, false);
-                }
-
-
-                switch (typeOfCurrentTag) {
-                    case "context-time": {
-                        contextTimeTags.add(tag);
-                        break;
-                    }
-                    case "context-location": {
-                        contextLocationTags.add(tag);
-                        break;
-                    }
-                }
-                it.remove();
-            }
+            it.remove();
         }
-
-
 
         writeHashSettoFile(contextTimeTags, "./context-time-tags.txt");
         writeHashSettoFile(contextLocationTags, "./context-location-tags.txt");
