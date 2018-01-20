@@ -274,9 +274,18 @@ public class FilterContextTag {
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
                 String tag = (String) pair.getKey();
+                //DEBUG:
+                if (tag.equals("<August_2004>")) {
+                    System.out.println("<August_2004> is examined");
+                }
                 switch (typeOfTag(tag)) {
                     case "context-time": {
                         contextTimeTags.add(tag);
+                        //DEBUG:
+                        if (tag.equals("<August_2004>")) {
+                            System.out.println("<August_2004> is a context-time tag");
+                        }
+
                         break;
                     }
                     case "context-location": {
