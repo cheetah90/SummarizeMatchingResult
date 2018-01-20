@@ -188,8 +188,12 @@ public class FilterContextTag {
                 typesofHypernyms.add(typeOfTag(hypernym));
             }
 
-            System.out.println("Tag= "+ tag + "| Its hypernyms are: " + typesofHypernyms.toString());
+            if (PROPERTIES.getProperty("debugOnServer").equals("true")) {
+                System.out.println("Tag= "+ tag + "| Its hypernyms are: " + typesofHypernyms.toString());
+            }
 
+            // Only or contain?
+            // Contain: <2014> <August_2014> has event
             if (typesofHypernyms.contains("context-location")) {
                 return "context-location";
             } else if (typesofHypernyms.contains("context-time")) {
