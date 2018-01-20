@@ -42,17 +42,7 @@ public class FilterContextTag {
             String object = rs.getString("object");
             String predicate = rs.getString("predicate");
 
-            //DEBUG:
-            if (subject.equals("<August_2014>")){
-                System.out.println("<August_2014> is read from the psql");
-            }
-
             if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
-                //DEBUG: add some debug code
-                if (subject.equals("<August_2014>")){
-                    System.out.println("<August_2014> is loaded into yagoEntities2Type");
-                }
-
                 // first add to yagoLowercase2Original
                 if (yagoEntities2Types.get(subject) == null) {
                     // the lowercase does not exist
@@ -190,7 +180,12 @@ public class FilterContextTag {
         HashSet<String> hypernymSet = yagoEntities2Types.get(tag);
 
         if (needPrint){
-            System.out.println(tag + "'s hyperhymSet is: " + hypernymSet.toString());
+            if (hypernymSet == null) {
+                System.out.println(tag + "'s hyperhymSet is empty.");
+            } else {
+                System.out.println(tag + "'s hyperhymSet is: " + hypernymSet.toString());
+            }
+
         }
 
         if (hypernymSet!=null) {
