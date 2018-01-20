@@ -189,6 +189,10 @@ public class FilterContextTag {
 
         HashSet<String> hypernymSet = yagoEntities2Types.get(tag);
 
+        if (tag.equals("<August_2014>")){
+            System.out.println("<August_2014>'s hyperhymSet is: " + hypernymSet.toString());
+        }
+
         if (hypernymSet!=null) {
             // none of the set is context
             // iterate through each
@@ -198,7 +202,7 @@ public class FilterContextTag {
                 typesofHypernyms.add(typeOfTag(hypernym));
             }
 
-            if (PROPERTIES.getProperty("debugOnServer").equals("true")) {
+            if (tag.equals("<August_2014>")) {
                 System.out.println("Tag= "+ tag + "| Its hypernyms are: " + typesofHypernyms.toString());
             }
 
