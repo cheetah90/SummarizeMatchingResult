@@ -190,9 +190,9 @@ public class FilterContextTag {
 
             System.out.println("Tag= "+ tag + "| Its hypernyms are: " + typesofHypernyms.toString());
 
-            if (typesofHypernyms.size()==1 && typesofHypernyms.contains("context-location")) {
+            if (typesofHypernyms.contains("context-location")) {
                 return "context-location";
-            } else if (typesofHypernyms.size()==1 && typesofHypernyms.contains("context-time")) {
+            } else if (typesofHypernyms.contains("context-time")) {
                 return "context-time";
             }
 
