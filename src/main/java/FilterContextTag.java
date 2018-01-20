@@ -259,7 +259,7 @@ public class FilterContextTag {
 
 
             String typeOfCurrentTag;
-            if (tag.equals("<August_2014>")) {
+            if (tag.equals("<2014>")) {
                 typeOfCurrentTag = typeOfTag(tag, true);
             } else {
                 typeOfCurrentTag = typeOfTag(tag, false);
