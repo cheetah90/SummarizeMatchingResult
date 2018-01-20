@@ -188,6 +188,8 @@ public class FilterContextTag {
                 typesofHypernyms.add(typeOfTag(hypernym));
             }
 
+            System.out.println("Tag= "+ tag + "| Its hypernyms are: " + typesofHypernyms.toString());
+
             if (typesofHypernyms.size()==1 && typesofHypernyms.contains("context-location")) {
                 return "context-location";
             } else if (typesofHypernyms.size()==1 && typesofHypernyms.contains("context-time")) {
@@ -236,22 +238,43 @@ public class FilterContextTag {
     }
 
     private void startFiltering(){
-        Iterator it = yagoEntities2Types.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-            String tag = (String) pair.getKey();
-            switch (typeOfTag(tag)) {
-                case "context-time": {
-                    contextTimeTags.add(tag);
-                    break;
-                }
-                case "context-location": {
-                    contextLocationTags.add(tag);
-                    break;
+        if (PROPERTIES.getProperty("debugOnServer").equals("true")) {
+            List<String> sampleTags = new ArrayList<>();
+            sampleTags.add("<2004>");
+            sampleTags.add("<August_2004>");
+
+            for (String tag: sampleTags) {
+                switch (typeOfTag(tag)) {
+                    case "context-time": {
+                        contextTimeTags.add(tag);
+                        break;
+                    }
+                    case "context-location": {
+                        contextLocationTags.add(tag);
+                        break;
+                    }
                 }
             }
-            it.remove();
+        } else {
+            Iterator it = yagoEntities2Types.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                String tag = (String) pair.getKey();
+                switch (typeOfTag(tag)) {
+                    case "context-time": {
+                        contextTimeTags.add(tag);
+                        break;
+                    }
+                    case "context-location": {
+                        contextLocationTags.add(tag);
+                        break;
+                    }
+                }
+                it.remove();
+            }
         }
+
+
 
         writeHashSettoFile(contextTimeTags, "./context-time-tags.txt");
         writeHashSettoFile(contextLocationTags, "./context-location-tags.txt");
