@@ -160,6 +160,7 @@ public class FilterContextTag {
                 stmt.close();
             }
 
+            logger.info("Finished loading yago to memory!");
 
         } catch (SQLException exception) {
             exception.printStackTrace();
@@ -261,6 +262,8 @@ public class FilterContextTag {
             } else {
                 typeOfCurrentTag = typeOfTag(tag, false);
             }
+
+            logger.info(tag + "is " + typeOfCurrentTag);
 
             switch (typeOfCurrentTag) {
                 case "context-time": {
