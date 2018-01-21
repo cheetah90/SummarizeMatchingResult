@@ -179,8 +179,6 @@ public class ResultSummarizer {
 
 
         } else {
-            System.out.println("None wordnet word is: " + tag + " Its weight is: " + weight);
-            
             // If not, then recursively check its object
             HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
             List<String> objectsList = new ArrayList<>(objectsHashSet);
@@ -282,7 +280,6 @@ public class ResultSummarizer {
         // Filter invalid tags
         List<String> validTagsArray = filterAllTags(tagsArray);
 
-        System.out.println("Valid tags are :" + validTagsArray.toString() + " sum of weights is: " + sum_of_weights);
         // Process each tag
         for (String tag: validTagsArray) {
             // If not, then process each of its object
