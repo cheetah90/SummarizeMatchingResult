@@ -110,7 +110,7 @@ public class AddMissingWordNettoYago {
             while (rs.next()) {
                 String entity = rs.getString("subject");
                 if (entity != null){
-                    String lower_entity = entity.substring(1, entity.length()-2).toLowerCase();
+                    String lower_entity = entity.substring(1, entity.length()-1).toLowerCase();
                     String synset = word2WorNetID.get(lower_entity);
                     if (synset != null && isValidEntity(entity)) {
                         // <Yago entity, wordnet synset>
