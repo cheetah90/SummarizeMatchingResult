@@ -77,6 +77,11 @@ public class AddMissingWordNettoYago {
             return false;
         }
 
+        //If all uppercase
+        if (entity.toUpperCase().equals(entity) && entity.length() > 3) {
+            return false;
+        }
+
         // If not too short
         if (entity.length()<5) {
             return false;
