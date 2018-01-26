@@ -109,12 +109,17 @@ public class AddMissingWordNettoYago {
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 String entity = rs.getString("subject");
-                String lower_entity = entity.substring(1,entity.length()-2).toLowerCase();
-                String synset = word2WorNetID.get(lower_entity);
-                if (synset != null && isValidEntity(entity)) {
-                    // <Yago entity, wordnet synset>
-                    missingMappoing.putIfAbsent(entity, synset);
+                if (entity != null){
+                    String lower_entity = entity.substring(1, entity.length()-2).toLowerCase();
+                    String synset = word2WorNetID.get(lower_entity);
+                    if (synset != null && isValidEntity(entity)) {
+                        // <Yago entity, wordnet synset>
+                        missingMappoing.putIfAbsent(entity, synset);
+                    }
+                } else {
+                    System.out.println("Subject is null. Weird!");
                 }
+
             }
 
             rs.close();
