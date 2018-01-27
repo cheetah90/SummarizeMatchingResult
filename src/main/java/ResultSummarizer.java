@@ -101,10 +101,10 @@ public class ResultSummarizer {
 
     private void writeToFile(){
         // Write the count summary
-        writeHashMaptoFile(summarizationCount, "./summary_by_count.tsv");
+        writeHashMaptoFile(summarizationCount, "./output/summary_by_count.tsv");
 
         // Write the weight summary
-        writeHashMaptoFile(summarizationWeight, "./summary_by_weight.tsv");
+        writeHashMaptoFile(summarizationWeight, "./output/summary_by_weight.tsv");
     }
 
     private boolean isValidTag(String tag) {
@@ -176,7 +176,7 @@ public class ResultSummarizer {
         // Create ThreadPool
         //ExecutorService pool = Executors.newFixedThreadPool(Integer.parseInt(PROPERTIES.getProperty("maxThreadPool")));
 
-        String fileInput = "./output_per_img.tsv";
+        String fileInput = "./data/output_per_img.tsv";
 
         try {
             // Buffered read the file
