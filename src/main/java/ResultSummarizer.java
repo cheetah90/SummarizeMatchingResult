@@ -134,15 +134,6 @@ public class ResultSummarizer {
         }
     }
 
-    private void clearOutputfile(String outputFileName){
-        try {
-            Writer output = new BufferedWriter(new FileWriter(outputFileName, false));
-            output.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private boolean isWordNetSynset(String object) {
         return object.startsWith("<wordnet_");
     }
@@ -191,7 +182,7 @@ public class ResultSummarizer {
 
     private void writeHashMaptoFile(HashMap summarization, String outputFile){
         //clearOutputfile
-        clearOutputfile(outputFile);
+        IOUtilities.clearOutputfile(outputFile);
 
         BufferedWriter bw;
         FileWriter fw;

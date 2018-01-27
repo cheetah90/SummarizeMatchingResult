@@ -1,9 +1,7 @@
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +12,27 @@ public class IOUtilities {
     private static final Logger logger = LogManager.getLogger(ResultSummarizer.class);
 
     private static Properties PROPERTIES;
+
+    static void appendLinetoFile(String strLine, String outputFileName){
+        try {
+            Writer output = new BufferedWriter(new FileWriter(outputFileName, true));
+            output.append(strLine);
+            output.append("\n");
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    static void clearOutputfile(String outputFileName){
+        try {
+            Writer output = new BufferedWriter(new FileWriter(outputFileName, false));
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     private static boolean isValidObject(String typeInfo) {
