@@ -127,7 +127,7 @@ public class IOUtilities {
 
         try {
             // Read context-location tags
-            fileName = "./context-location-tags.txt";
+            fileName = "./data/context-location-tags.txt";
             BufferedReader br = new BufferedReader(new FileReader(fileName));
 
             while ((line = br.readLine()) != null) {
@@ -137,7 +137,7 @@ public class IOUtilities {
 
 
             // Read context-time tags
-            fileName = "./context-time-tags.txt";
+            fileName = "./data/context-time-tags.txt";
             br = new BufferedReader(new FileReader(fileName));
             while ((line = br.readLine()) != null) {
                 // process the line.
