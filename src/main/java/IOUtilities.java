@@ -155,6 +155,7 @@ public class IOUtilities {
         try {
             if (PROPERTIES == null) {
                 try {
+                    PROPERTIES = new Properties();
                     //Load properties file
                     PROPERTIES.load(new InputStreamReader(new FileInputStream("./src/main/resources/config.properties"), "UTF8"));
                 } catch (IOException exception) {
