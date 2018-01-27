@@ -21,7 +21,7 @@ public class ReplaceEntitiestoWordNet {
 
         try {
             // Read context-location tags
-            fileName = "./missing_wordnet.txt";
+            fileName = "./data/missing_wordnet.txt";
             BufferedReader br = new BufferedReader(new FileReader(fileName));
 
             while ((line = br.readLine()) != null) {
@@ -59,7 +59,7 @@ public class ReplaceEntitiestoWordNet {
 
 
     private void startWorking(){
-        String outputFileName = "./replaced_entities_per_img.tsv";
+        String outputFileName = "./output/replaced_entities_per_img.tsv";
 
         IOUtilities.clearOutputfile(outputFileName);
 
@@ -68,7 +68,7 @@ public class ReplaceEntitiestoWordNet {
 
         try {
             // Read context-location tags
-            fileName = "./output_per_img.tsv";
+            fileName = "./data/output_per_img.tsv";
             BufferedReader br = new BufferedReader(new FileReader(fileName));
 
             while ((line = br.readLine()) != null) {
