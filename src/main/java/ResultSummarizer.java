@@ -176,7 +176,7 @@ public class ResultSummarizer {
         // Create ThreadPool
         //ExecutorService pool = Executors.newFixedThreadPool(Integer.parseInt(PROPERTIES.getProperty("maxThreadPool")));
 
-        String fileInput = "./data/output_per_img.tsv";
+        String fileInput = "./data/replaced_entities_per_img.tsv";
 
         try {
             // Buffered read the file
