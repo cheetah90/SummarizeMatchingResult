@@ -9,8 +9,6 @@ public class ResultSummarizer {
 
     private static final Logger logger = LogManager.getLogger(ResultSummarizer.class);
 
-    private static final Properties PROPERTIES = new Properties();
-
     private final static HashMap<String, HashSet<String>> yagoEntities2Types = new HashMap<>();
 
     private final static HashMap<String, Double> summarizationWeight = new HashMap<>();
@@ -22,116 +20,10 @@ public class ResultSummarizer {
     private HashSet<String> synSetforImage = new HashSet<>();
 
     private ResultSummarizer(){
-        try {
-            //Load properties file
-            PROPERTIES.load(new InputStreamReader(new FileInputStream("./src/main/resources/config.properties"), "UTF8"));
-        } catch (IOException exception) {
-            return;
-        }
 
-        loadYagotoMemory();
+        IOUtilities.loadYagotoMemory(yagoEntities2Types);
 
-        loadContextTagstoMemory();
-    }
-
-    private void loadContextTagstoMemory(){
-        String line;
-        String fileName="";
-
-        try {
-            // Read context-location tags
-            fileName = "./context-location-tags.txt";
-            BufferedReader br = new BufferedReader(new FileReader(fileName));
-
-            while ((line = br.readLine()) != null) {
-                // process the line.
-                contextTags.add(line);
-            }
-
-
-            // Read context-time tags
-            fileName = "./context-time-tags.txt";
-            br = new BufferedReader(new FileReader(fileName));
-            while ((line = br.readLine()) != null) {
-                // process the line.
-                contextTags.add(line);
-            }
-
-        } catch (IOException exception) {
-            logger.error("Error: failed to read a line from " + fileName);
-            exception.printStackTrace();
-        }
-    }
-
-    private boolean isValidObject(String typeInfo) {
-        return (typeInfo != null &&
-                !typeInfo.contains("wikicat_Abbreviations")
-                && !typeInfo.contains("wordnet_first_name")
-                && !typeInfo.contains("wordnet_surname")
-        );
-    }
-
-    private void loadEnWikiResultSet(ResultSet rs) throws SQLException {
-        while (rs.next()) {
-            String subject = rs.getString("subject");
-            String object = rs.getString("object");
-            String predicate = rs.getString("predicate");
-
-            if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
-                // first add to yagoLowercase2Original
-                if (yagoEntities2Types.get(subject) == null) {
-                    // the lowercase does not exist
-                    HashSet<String> hashSet = new HashSet<>();
-                    hashSet.add(object);
-                    yagoEntities2Types.put(subject, hashSet);
-                } else {
-                    yagoEntities2Types.get(subject).add(object);
-                }
-
-                if (PROPERTIES.getProperty("debugLocally").equals("true")) {
-
-                    HashSet<String> hashSet3 = new HashSet<>();
-                    hashSet3.add("<wordnet_person_100007846>");
-                    yagoEntities2Types.put("<wikicat_Polish_people>", hashSet3);
-                }
-
-            }
-
-        }
-    }
-
-    private void loadForeignWikiResultSet(ResultSet rs) throws SQLException {
-        while (rs.next()) {
-            String subject = rs.getString("subject");
-            String object = rs.getString("object");
-            String predicate = rs.getString("predicate");
-
-            if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
-                // If this is a multilingual word
-                if (subject.length() > 5 && subject.substring(1,4).matches("[a-zA-Z]{2}/")) {
-                    String strip_subject = "<"+subject.substring(4);
-
-                    // first add to yagoLowercase2Original
-                    // if this foreign entity does not exist in en.wiki, add it without the lang code
-                    if (yagoEntities2Types.get(strip_subject) == null) {
-                        // the lowercase does not exist
-                        HashSet<String> hashSet = new HashSet<>();
-                        hashSet.add(object);
-                        yagoEntities2Types.put(strip_subject, hashSet);
-                    } else {
-                        // if this foreign entity exist in en.wiki, add it with the lang code
-                        if (yagoEntities2Types.get(subject) == null) {
-                            // the lowercase does not exist
-                            HashSet<String> hashSet = new HashSet<>();
-                            hashSet.add(object);
-                            yagoEntities2Types.put(subject, hashSet);
-                        } else {
-                            yagoEntities2Types.get(subject).add(object);
-                        }
-                    }
-                }
-            }
-        }
+        IOUtilities.loadContextTagstoMemory(contextTags);
     }
 
     private boolean isWordNetSynset(String object) {
@@ -307,58 +199,6 @@ public class ResultSummarizer {
         }
 
 
-    }
-
-    private void loadYagotoMemory(){
-        try {
-            Connection yagoConnection = DriverManager.getConnection("jdbc:postgresql://localhost:"+PROPERTIES.getProperty("db4Yago.port")+"/"+PROPERTIES.getProperty("db4Yago.name"),
-                    PROPERTIES.getProperty("db4Yago.username"), PROPERTIES.getProperty("db4Yago.password"));
-
-            PreparedStatement stmt;
-
-            // local debug mode: only load subset of types
-            if (PROPERTIES.getProperty("debugLocally").equals("true")) {
-                String query_yagotype = "SELECT * FROM subset_yagotypes";
-                stmt = yagoConnection.prepareStatement(query_yagotype);
-                ResultSet rs = stmt.executeQuery();
-                //Load the resultset
-                loadEnWikiResultSet(rs);
-                rs.close();
-                stmt.close();
-
-            } else {
-                // load all dataset
-                // 1) load the enwiki yagotypes
-                String query_yagotype = "SELECT * FROM yagotypes_enwiki";
-                stmt = yagoConnection.prepareStatement(query_yagotype);
-                ResultSet rs = stmt.executeQuery();
-                //Load the resultset
-                loadEnWikiResultSet(rs);
-                rs.close();
-                stmt.close();
-
-                // 2) load the foreign yagotypes
-                query_yagotype = "SELECT * FROM yagotypes_foreignwiki";
-                stmt = yagoConnection.prepareStatement(query_yagotype);
-                rs = stmt.executeQuery();
-                //Load the resultset
-                loadForeignWikiResultSet(rs);
-                rs.close();
-                stmt.close();
-
-                // 3 Load the yagotaxonomy
-                String query_yagotaxonomy = "SELECT * FROM YAGOTAXONOMY";
-                stmt = yagoConnection.prepareStatement(query_yagotaxonomy);
-                rs = stmt.executeQuery();
-                loadEnWikiResultSet(rs);
-                rs.close();
-                stmt.close();
-            }
-
-
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }
     }
 
     public static void main(String[] args){

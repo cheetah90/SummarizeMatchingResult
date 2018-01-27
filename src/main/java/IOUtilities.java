@@ -121,6 +121,35 @@ public class IOUtilities {
         }
     }
 
+    static void loadContextTagstoMemory(HashSet<String> contextTags){
+        String line;
+        String fileName="";
+
+        try {
+            // Read context-location tags
+            fileName = "./context-location-tags.txt";
+            BufferedReader br = new BufferedReader(new FileReader(fileName));
+
+            while ((line = br.readLine()) != null) {
+                // process the line.
+                contextTags.add(line);
+            }
+
+
+            // Read context-time tags
+            fileName = "./context-time-tags.txt";
+            br = new BufferedReader(new FileReader(fileName));
+            while ((line = br.readLine()) != null) {
+                // process the line.
+                contextTags.add(line);
+            }
+
+        } catch (IOException exception) {
+            logger.error("Error: failed to read a line from " + fileName);
+            exception.printStackTrace();
+        }
+    }
+
     static void loadYagotoMemory(HashMap<String, HashSet<String>> yagoEntities2Type){
 
         try {
