@@ -4,12 +4,14 @@ SummarizeWordNet.iml
 target/
 
 # results files
+data/
 logs.log
 context-location-tags.txt
 context-time-tags.txt
 missing_wordnet.txt
 replaced_entities_per_img.tsv
 
+output/
 output_per_tag.tsv
 output_per_img.tsv
 summarization_result.tsv
