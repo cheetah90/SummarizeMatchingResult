@@ -13,48 +13,11 @@ public class AddMissingWordNettoYago {
 
     private final static HashMap<String, HashSet<String>> yagoEntities2Types = new HashMap<>();
 
-    private final static HashMap<String, HashSet<String>> AisaB = new HashMap<>();
-
-    private void loadWordNetIsARelation(){
-        String line;
-        String fileName="";
-
-        try {
-            // Read context-location tags
-            fileName = "./data/wordnet.is_a.txt";
-            BufferedReader br = new BufferedReader(new FileReader(fileName));
-
-            while ((line = br.readLine()) != null) {
-                // process the line.
-                String[] aIsb = line.split(" ");
-
-                String parent = aIsb[0].replace("n","1");
-                String child = aIsb[1].replace("n", "1");
-
-                if (AisaB.containsKey(child)){
-                    HashSet<String> parents = AisaB.get(child);
-                    parents.add(parent);
-                    AisaB.put(child, parents);
-                } else {
-                    AisaB.put(child, new HashSet<String>());
-                }
-            }
-
-
-        } catch (IOException exception) {
-            logger.error("Error: failed to read a line from " + fileName);
-            exception.printStackTrace();
-        }
-
-    }
-
     private AddMissingWordNettoYago(){
 
         IOUtilities.loadWordNetIDtoWordMapping(word2WorNetID);
 
         IOUtilities.loadYagotoMemory(yagoEntities2Types);
-
-        loadWordNetIsARelation();
 
     }
 
@@ -66,8 +29,6 @@ public class AddMissingWordNettoYago {
             // Read context-location tags
             fileName = "./data/missing_wordnet.txt";
             BufferedReader br = new BufferedReader(new FileReader(fileName));
-
-            PreparedStatement stmt;
 
             while ((line = br.readLine()) != null) {
                 // process the line.
