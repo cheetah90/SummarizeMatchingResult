@@ -150,6 +150,35 @@ public class IOUtilities {
         }
     }
 
+    private static void loadMapping(ResultSet resultSet, HashMap<String, String> word2WorNetID) throws SQLException{
+        while (resultSet.next()){
+            String wordnet_id = resultSet.getString("wordnet_id");
+            String word = resultSet.getString("word");
+
+            word2WorNetID.putIfAbsent(word, "<wordnet_" + word + "_" + wordnet_id + ">");
+
+        }
+    }
+
+    static void loadWordNetIDtoWordMapping(HashMap<String, String> word2WorNetID){
+        try {
+            Connection yagoConnection = DriverManager.getConnection("jdbc:postgresql://localhost:"+PROPERTIES.getProperty("db4Yago.port")+"/"+PROPERTIES.getProperty("db4ImageNet.name"),
+                    PROPERTIES.getProperty("db4Yago.username"), PROPERTIES.getProperty("db4Yago.password"));
+
+            PreparedStatement stmt;
+
+            String query_yagotype = "SELECT * FROM imagenet_synsets_wnid_to_word";
+            stmt = yagoConnection.prepareStatement(query_yagotype);
+            ResultSet rs = stmt.executeQuery();
+            loadMapping(rs, word2WorNetID);
+            rs.close();
+            stmt.close();
+
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+    }
+
     static void loadYagotoMemory(HashMap<String, HashSet<String>> yagoEntities2Type){
 
         try {

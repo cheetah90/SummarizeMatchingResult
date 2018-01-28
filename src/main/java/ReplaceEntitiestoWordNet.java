@@ -15,7 +15,7 @@ public class ReplaceEntitiestoWordNet {
 
     private static final HashMap<String, String> entities2WordNet = new HashMap<>();
 
-    private void loadEntities2WordNetMapping(){
+    static void loadEntities2WordNetMapping(HashMap<String, String> entities2WordNet){
         String line;
         String fileName="";
 
@@ -102,7 +102,7 @@ public class ReplaceEntitiestoWordNet {
     }
 
     private ReplaceEntitiestoWordNet(){
-        loadEntities2WordNetMapping();
+        loadEntities2WordNetMapping(entities2WordNet);
     }
 
     public static void main(String[] args){
