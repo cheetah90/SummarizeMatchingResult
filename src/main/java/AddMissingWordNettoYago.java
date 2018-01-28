@@ -9,13 +9,9 @@ public class AddMissingWordNettoYago {
 
     private static final Logger logger = LogManager.getLogger(ResultSummarizer.class);
 
-    private static final HashMap<String, String> word2WorNetID = new HashMap<>();
-
     private final static HashMap<String, HashSet<String>> yagoEntities2Types = new HashMap<>();
 
     private AddMissingWordNettoYago(){
-
-        IOUtilities.loadWordNetIDtoWordMapping(word2WorNetID);
 
         IOUtilities.loadYagotoMemory(yagoEntities2Types);
 
