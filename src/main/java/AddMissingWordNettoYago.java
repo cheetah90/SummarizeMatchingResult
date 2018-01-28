@@ -34,7 +34,6 @@ public class AddMissingWordNettoYago {
                 if (!yagoEntities2Types.containsKey(wordnet_synset)){
                     logger.info(wordnet_synset);
                 }
-
             }
 
 
