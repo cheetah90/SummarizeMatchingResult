@@ -30,6 +30,28 @@ public class ResultSummarizer {
         return object.startsWith("<wordnet_");
     }
 
+    private void updateSummaryCount(String tag){
+        // If a new synset, add the count
+        if (!synSetforImage.contains(tag)) {
+            // Update the summarizationCount
+            if (summarizationCount.get(tag) == null) {
+                summarizationCount.put(tag, 1);
+            } else {
+                int currentCount = summarizationCount.get(tag);
+                summarizationCount.put(tag, currentCount+1);
+            }
+        }
+    }
+
+    private void updateSummaryWeight(String tag, Double weight){
+        if (summarizationWeight.get(tag) == null) {
+            summarizationWeight.put(tag, weight);
+        } else {
+            double currentWeight = summarizationWeight.get(tag);
+            summarizationWeight.put(tag, currentWeight+ weight);
+        }
+    }
+
     private void processOneTag(String tag, Double weight) {
         // Hack to deal with the number inconsistencies of wordnet_postage. Fixed in MatchYago
         if (tag.startsWith("<wordnet_postage")) {
@@ -38,38 +60,20 @@ public class ResultSummarizer {
 
         // If this is a wordnet, then update the summarization results
         if (isWordNetSynset(tag)) {
-            // If a new synset, add the count
-            if (!synSetforImage.contains(tag)) {
-                // Update the summarizationCount
-                if (summarizationCount.get(tag) == null) {
-                    summarizationCount.put(tag, 1);
-                } else {
-                    int currentCount = summarizationCount.get(tag);
-                    summarizationCount.put(tag, currentCount+1);
-                }
-            }
-
-            // Update summarizationWeight
-            if (summarizationWeight.get(tag) == null) {
-                summarizationWeight.put(tag, weight);
-            } else {
-                double currentWeight = summarizationWeight.get(tag);
-                summarizationWeight.put(tag, currentWeight+ weight);
-            }
+            updateSummaryCount(tag);
+            updateSummaryWeight(tag, weight);
 
             // Add this synset to hash set
             synSetforImage.add(tag);
 
-
-        } else {
-            // If not, then recursively check its object
-            HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
-            List<String> objectsList = new ArrayList<>(objectsHashSet);
-
-            // If not, then process each of its object
-            processTagsRecursively(objectsList, weight);
         }
 
+        HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
+        List<String> parentYagoEntities = new ArrayList<>(objectsHashSet);
+
+        if (parentYagoEntities.size() != 0) {
+            processTagsRecursively(parentYagoEntities, weight);
+        }
     }
 
     private void writeHashMaptoFile(HashMap summarization, String outputFile){

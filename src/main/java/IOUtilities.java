@@ -80,8 +80,23 @@ public class IOUtilities {
                     HashSet<String> hashSet3 = new HashSet<>();
                     hashSet3.add("<wordnet_person_100007846>");
                     yagoEntities2Types.put("<wikicat_Polish_people>", hashSet3);
-                }
 
+                    HashSet<String> hashSet4 = new HashSet<>();
+                    hashSet4.add("<wordnet_philosophy_106158346>");
+                    yagoEntities2Types.put("<wordnet_epistemology_106166748>", hashSet4);
+
+                    HashSet<String> hashSet5 = new HashSet<>();
+                    hashSet5.add("<wordnet_philosophy_106158346>");
+                    yagoEntities2Types.put("<wordnet_logic_106163751>", hashSet5);
+
+                    HashSet<String> hashSet6 = new HashSet<>();
+                    hashSet6.add("<wordnet_humanistic_discipline_106153846>");
+                    yagoEntities2Types.put("<wordnet_philosophy_106158346>", hashSet6);
+
+                    HashSet<String> hashSet7 = new HashSet<>();
+                    hashSet7.add("<wordnet_philosophy_106158346>");
+                    yagoEntities2Types.put("<wordnet_metaphysics_106162653>", hashSet7);
+                }
             }
 
         }
