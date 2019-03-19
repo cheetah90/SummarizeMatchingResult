@@ -198,7 +198,6 @@ public class ResultSummarizer {
                 regularCats.add(tag);
             }
         }
-
     }
 
 
@@ -212,8 +211,13 @@ public class ResultSummarizer {
             // Buffered read the file
             BufferedReader br = new BufferedReader(new FileReader(fileInput));
             String line;
+            int counter = 0;
 
             while ((line = br.readLine()) != null) {
+                if (counter % 500000 == 0) {
+                    logger.info("Finished processing: " + counter);
+                }
+
                 synSetforImage.clear();
 
                 String tagsLine = line.split("\t")[2];
@@ -227,6 +231,8 @@ public class ResultSummarizer {
                 for (List<String> one_parentTag: parentTags) {
                     processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
                 }
+
+                counter++;
 
             }
         } catch (Exception exception) {
