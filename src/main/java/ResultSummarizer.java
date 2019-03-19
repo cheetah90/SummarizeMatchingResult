@@ -119,7 +119,9 @@ public class ResultSummarizer {
 
         // If it does not exist, it's a bad
         if (yagoEntities2Types.get(tag) == null) {
-            logger.error("Error - tag does not exist: " + tag);
+            if (!tag.equals("owl:Thing")) {
+                logger.error("Error - tag does not exist: " + tag);
+            }
             return false;
         }
 
@@ -214,7 +216,7 @@ public class ResultSummarizer {
             int counter = 0;
 
             while ((line = br.readLine()) != null) {
-                if (counter % 500000 == 0) {
+                if (counter % 10000 == 0) {
                     logger.info("Finished processing: " + counter);
                 }
 
