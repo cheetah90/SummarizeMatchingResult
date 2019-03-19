@@ -96,6 +96,32 @@ public class IOUtilities {
                     HashSet<String> hashSet7 = new HashSet<>();
                     hashSet7.add("<wordnet_philosophy_106158346>");
                     yagoEntities2Types.put("<wordnet_metaphysics_106162653>", hashSet7);
+
+                    HashSet<String> hashSet8 = new HashSet<>();
+                    hashSet8.add("<wikicat_Books>");
+                    hashSet8.add("<wikicat_Magazines>");
+                    yagoEntities2Types.put("<Book_cover>", hashSet8);
+
+                    HashSet<String> hashSet9 = new HashSet<>();
+                    hashSet9.add("<wordnet_book_106410904>");
+                    yagoEntities2Types.put("<wikicat_Books>", hashSet9);
+
+                    HashSet<String> hashSet10 = new HashSet<>();
+                    hashSet10.add("<wordnet_magazine_106595351>");
+                    yagoEntities2Types.put("<wikicat_Magazines>", hashSet10);
+
+                    HashSet<String> hashSet11 = new HashSet<>();
+                    hashSet11.add("<wordnet_publication_106589574>");
+                    yagoEntities2Types.put("<wordnet_magazine_106595351>", hashSet11);
+
+                    HashSet<String> hashSet12 = new HashSet<>();
+                    hashSet12.add("<wordnet_publication_106589574>");
+                    yagoEntities2Types.put("<wordnet_book_106410904>", hashSet12);
+
+                    HashSet<String> hashSet13 = new HashSet<>();
+                    hashSet13.add("<wordnet_work_104599396>");
+                    yagoEntities2Types.put("<wordnet_publication_106589574>", hashSet13);
+
                 }
             }
 
