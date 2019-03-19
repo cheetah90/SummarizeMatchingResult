@@ -126,8 +126,10 @@ public class ResultSummarizer {
         }
 
         // If it's a context tag, it's bad
-        if (contextTags.contains(tag)) {
-            return false;
+        if (IOUtilities.PROPERTIES.getProperty("excludeContextTags").equals("true")) {
+            if (contextTags.contains(tag)) {
+                return false;
+            }
         }
 
         return true;
@@ -204,9 +206,6 @@ public class ResultSummarizer {
 
 
     private void startSummarization(){
-        // Create ThreadPool
-        //ExecutorService pool = Executors.newFixedThreadPool(Integer.parseInt(PROPERTIES.getProperty("maxThreadPool")));
-
         String fileInput = "./output/replaced_entities_per_img_parcat.tsv";
 
         try {

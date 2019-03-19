@@ -11,7 +11,7 @@ public class IOUtilities {
 
     private static final Logger logger = LogManager.getLogger(ResultSummarizer.class);
 
-    private static Properties PROPERTIES;
+    public static Properties PROPERTIES;
 
     static void appendLinetoFile(String strLine, String outputFileName){
         try {
