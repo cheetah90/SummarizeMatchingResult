@@ -216,26 +216,29 @@ public class ResultSummarizer {
             int counter = 0;
 
             while ((line = br.readLine()) != null) {
-                if (counter % 10000 == 0) {
-                    logger.info("Finished processing: " + counter);
+                try {
+                    if (counter % 10000 == 0) {
+                        logger.info("Finished processing: " + counter);
+                    }
+
+                    synSetforImage.clear();
+
+                    String tagsLine = line.split("\t")[2];
+                    List<String> regularTags = new ArrayList<>();
+                    List<List<String>> parentTags = new ArrayList<>();
+                    splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
+
+                    //Process regular tags
+                    double weights_regularTags = ((double) regularTags.size()) / (regularTags.size() + parentTags.size());
+                    processTagsRecursively(regularTags, weights_regularTags);
+                    for (List<String> one_parentTag: parentTags) {
+                        processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
+                    }
+
+                    counter++;
+                } catch (StackOverflowError e) {
+                    logger.error("StackOverflowError happens at: " + line);
                 }
-
-                synSetforImage.clear();
-
-                String tagsLine = line.split("\t")[2];
-                List<String> regularTags = new ArrayList<>();
-                List<List<String>> parentTags = new ArrayList<>();
-                splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
-
-                //Process regular tags
-                double weights_regularTags = ((double) regularTags.size()) / (regularTags.size() + parentTags.size());
-                processTagsRecursively(regularTags, weights_regularTags);
-                for (List<String> one_parentTag: parentTags) {
-                    processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
-                }
-
-                counter++;
-
             }
         } catch (Exception exception) {
             logger.error("filenames.txt does not exist!");
