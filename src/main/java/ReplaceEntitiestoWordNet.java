@@ -79,39 +79,41 @@ public class ReplaceEntitiestoWordNet {
                 // process the line.
 
                 String[] rawArray = line.split("\t");
-                String strTag = rawArray[2];
+                if (rawArray.length == 3) {
+                    String strTag = rawArray[2];
 
 
-                List<String> tagsArray = loadArrayListFromtoString(strTag, "<", ">");
-                ArrayList<String> new_tagsArray = new ArrayList<>();
+                    List<String> tagsArray = loadArrayListFromtoString(strTag, "<", ">");
+                    ArrayList<String> new_tagsArray = new ArrayList<>();
 
-                for (String tag: tagsArray) {
-                    if (isParentCats(tag)) {
-                        tag = tag.substring(1,tag.length()-1);
-                        List<String> parentTags = new ArrayList<>();
-                        for (String parentTag: loadArrayListFromtoString(tag, "{", "}")){
-                            if (entities2WordNet.keySet().contains(parentTag)){
-                                parentTags.add(entities2WordNet.get(parentTag.replace('{', '<').replace('}', '>')));
-                            } else {
-                                parentTags.add(parentTag.replace('<', '{').replace('>', '}'));
+                    for (String tag: tagsArray) {
+                        if (isParentCats(tag)) {
+                            tag = tag.substring(1,tag.length()-1);
+                            List<String> parentTags = new ArrayList<>();
+                            for (String parentTag: loadArrayListFromtoString(tag, "{", "}")){
+                                if (entities2WordNet.keySet().contains(parentTag)){
+                                    parentTags.add(entities2WordNet.get(parentTag.replace('{', '<').replace('}', '>')));
+                                } else {
+                                    parentTags.add(parentTag.replace('<', '{').replace('>', '}'));
+                                }
                             }
-                        }
 
-                        new_tagsArray.add("<" + parentTags.toString() + ">");
-                    } else {
-                        if (entities2WordNet.keySet().contains(tag)){
-                            new_tagsArray.add(entities2WordNet.get(tag));
+                            new_tagsArray.add("<" + parentTags.toString() + ">");
                         } else {
-                            new_tagsArray.add(tag);
+                            if (entities2WordNet.keySet().contains(tag)){
+                                new_tagsArray.add(entities2WordNet.get(tag));
+                            } else {
+                                new_tagsArray.add(tag);
+                            }
                         }
                     }
 
+                    String strOutputLine = rawArray[0]+"\t"+rawArray[1]+"\t" + new_tagsArray.toString();
 
+                    IOUtilities.appendLinetoFile(strOutputLine, outputFileName);
+                } else {
+                    logger.error("Error: this line is malformated." + line);
                 }
-
-                String strOutputLine = rawArray[0]+"\t"+rawArray[1]+"\t" + new_tagsArray.toString();
-
-                IOUtilities.appendLinetoFile(strOutputLine, outputFileName);
             }
 
 
