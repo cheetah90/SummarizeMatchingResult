@@ -128,17 +128,19 @@ public class ResultSummarizer {
 
     }
 
-    private List<String> parseTagsofImage(String strLine) {
+    private List<String> loadArrayListFromtoString(String strLine, String leftDelimiter, String rightDelimiter) {
+        strLine = strLine.substring(1,strLine.length()-1);
+
         ArrayList<String> tagsList = new ArrayList<>();
 
-        String[] tagsParsed = strLine.split(">, <");
+        String[] tagsParsed = strLine.split(rightDelimiter+", \\"+leftDelimiter);
         for (String tag: tagsParsed) {
-            if (!tag.startsWith("<")) {
-                tag = "<" + tag;
+            if (!tag.startsWith(leftDelimiter)) {
+                tag = leftDelimiter + tag;
             }
 
-            if (!tag.endsWith(">")) {
-                tag = tag + ">";
+            if (!tag.endsWith(rightDelimiter)) {
+                tag = tag + rightDelimiter;
             }
 
             tagsList.add(tag);
@@ -171,12 +173,36 @@ public class ResultSummarizer {
 
     }
 
+    private boolean isParentCats(String tag) {
+        return tag.startsWith("<[{");
+    }
+
+    private void splitRegularCatandParentCats(String tagsLine, List<String> regularCats, List<List<String>> parentCats){
+        tagsLine = tagsLine.substring(1,tagsLine.length()-1);
+
+        List<String> tagsArray = loadArrayListFromtoString(tagsLine, "<", ">");
+
+        for (String tag: tagsArray) {
+            if (isParentCats(tag)) {
+                tag = tag.substring(1,tag.length()-1);
+                List<String> new_parentTags = new ArrayList<>();
+                for (String parTag: loadArrayListFromtoString(tag, "{", "}")) {
+                    new_parentTags.add(parTag.replace('{', '<').replace('}', '>'));
+                }
+                parentCats.add(new_parentTags);
+            } else {
+                regularCats.add(tag);
+            }
+        }
+
+    }
+
 
     private void startSummarization(){
         // Create ThreadPool
         //ExecutorService pool = Executors.newFixedThreadPool(Integer.parseInt(PROPERTIES.getProperty("maxThreadPool")));
 
-        String fileInput = "./data/replaced_entities_per_img.tsv";
+        String fileInput = "./output/replaced_entities_per_img_parcat.tsv";
 
         try {
             // Buffered read the file
@@ -187,11 +213,16 @@ public class ResultSummarizer {
                 synSetforImage.clear();
 
                 String tagsLine = line.split("\t")[2];
-                tagsLine = tagsLine.substring(1,tagsLine.length()-1);
+                List<String> regularTags = new ArrayList<>();
+                List<List<String>> parentTags = new ArrayList<>();
+                splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
 
-                List<String> tagsArray = parseTagsofImage(tagsLine);
-
-                processTagsRecursively(tagsArray, 1.0);
+                //Process regular tags
+                double weights_regularTags = ((double) regularTags.size()) / (regularTags.size() + parentTags.size());
+                processTagsRecursively(regularTags, weights_regularTags);
+                for (List<String> one_parentTag: parentTags) {
+                    processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
+                }
 
             }
         } catch (Exception exception) {

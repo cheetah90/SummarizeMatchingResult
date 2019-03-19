@@ -106,15 +106,7 @@ public class IOUtilities {
                         hashSet.add(object);
                         yagoEntities2Types.put(strip_subject, hashSet);
                     } else {
-                        // if this foreign entity exist in en.wiki, add it with the lang code
-                        if (yagoEntities2Types.get(subject) == null) {
-                            // the lowercase does not exist
-                            HashSet<String> hashSet = new HashSet<>();
-                            hashSet.add(object);
-                            yagoEntities2Types.put(subject, hashSet);
-                        } else {
-                            yagoEntities2Types.get(subject).add(object);
-                        }
+                        yagoEntities2Types.get(strip_subject).add(object);
                     }
                 }
             }

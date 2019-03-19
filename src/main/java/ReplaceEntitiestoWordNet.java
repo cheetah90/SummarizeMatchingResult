@@ -37,17 +37,19 @@ public class ReplaceEntitiestoWordNet {
         }
     }
 
-    private List<String> parseTagsofImage(String strLine) {
-        ArrayList<String> tagsList = new ArrayList<>();
+    private List<String> loadArrayListFromtoString(String strLine, String leftDelimiter, String rightDelimiter) {
+        strLine = strLine.substring(1,strLine.length()-1);
 
-        String[] tagsParsed = strLine.split(">, <");
+        ArrayList<String> tagsList = new ArrayList<>();
+        String delimiter = rightDelimiter+ ", \\" +leftDelimiter;
+        String[] tagsParsed = strLine.split(delimiter);
         for (String tag: tagsParsed) {
-            if (!tag.startsWith("<")) {
-                tag = "<" + tag;
+            if (!tag.startsWith(leftDelimiter)) {
+                tag = leftDelimiter + tag;
             }
 
-            if (!tag.endsWith(">")) {
-                tag = tag + ">";
+            if (!tag.endsWith(rightDelimiter)) {
+                tag = tag + rightDelimiter;
             }
 
             tagsList.add(tag);
@@ -56,10 +58,12 @@ public class ReplaceEntitiestoWordNet {
         return tagsList;
     }
 
-
+    private boolean isParentCats(String tag) {
+        return tag.startsWith("<[{");
+    }
 
     private void startWorking(){
-        String outputFileName = "./output/replaced_entities_per_img.tsv";
+        String outputFileName = "./output/replaced_entities_per_img_parcat.tsv";
 
         IOUtilities.clearOutputfile(outputFileName);
 
@@ -68,7 +72,7 @@ public class ReplaceEntitiestoWordNet {
 
         try {
             // Read context-location tags
-            fileName = "./data/output_per_img.tsv";
+            fileName = "./data/output_per_img_parcat.tsv";
             BufferedReader br = new BufferedReader(new FileReader(fileName));
 
             while ((line = br.readLine()) != null) {
@@ -76,17 +80,33 @@ public class ReplaceEntitiestoWordNet {
 
                 String[] rawArray = line.split("\t");
                 String strTag = rawArray[2];
-                strTag = strTag.substring(1,strTag.length()-1);
 
-                List<String> tagsArray = parseTagsofImage(strTag);
+
+                List<String> tagsArray = loadArrayListFromtoString(strTag, "<", ">");
                 ArrayList<String> new_tagsArray = new ArrayList<>();
 
                 for (String tag: tagsArray) {
-                    if (entities2WordNet.keySet().contains(tag)){
-                        new_tagsArray.add(entities2WordNet.get(tag));
+                    if (isParentCats(tag)) {
+                        tag = tag.substring(1,tag.length()-1);
+                        List<String> parentTags = new ArrayList<>();
+                        for (String parentTag: loadArrayListFromtoString(tag, "{", "}")){
+                            if (entities2WordNet.keySet().contains(parentTag)){
+                                parentTags.add(entities2WordNet.get(parentTag.replace('{', '<').replace('}', '>')));
+                            } else {
+                                parentTags.add(parentTag.replace('<', '{').replace('>', '}'));
+                            }
+                        }
+
+                        new_tagsArray.add("<" + parentTags.toString() + ">");
                     } else {
-                        new_tagsArray.add(tag);
+                        if (entities2WordNet.keySet().contains(tag)){
+                            new_tagsArray.add(entities2WordNet.get(tag));
+                        } else {
+                            new_tagsArray.add(tag);
+                        }
                     }
+
+
                 }
 
                 String strOutputLine = rawArray[0]+"\t"+rawArray[1]+"\t" + new_tagsArray.toString();
