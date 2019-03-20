@@ -142,7 +142,7 @@ public class ResultSummarizer {
         }
 
         // if it starts with "yago", it's bad since it won't be counted in the weights
-        if (tag.startsWith("yago")) {
+        if (tag.startsWith("<yago")) {
             return false;
         }
 
