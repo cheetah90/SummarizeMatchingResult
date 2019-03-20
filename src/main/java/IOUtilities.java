@@ -51,6 +51,12 @@ public class IOUtilities {
 
             if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
                 // first add to yagoLowercase2Original
+                if (subject.startsWith("<wordnet_")) {
+                    String[] splits = subject.split("_");
+                    subject = splits[splits.length-1];
+                    subject = subject.substring(0, subject.length()-1);
+                }
+
                 if (yagoEntities2Types.get(subject) == null) {
                     // the lowercase does not exist
                     HashSet<String> hashSet = new HashSet<>();
@@ -60,70 +66,71 @@ public class IOUtilities {
                     yagoEntities2Types.get(subject).add(object);
                 }
 
-                if (PROPERTIES.getProperty("debugLocally").equals("true")) {
-                    HashSet<String> hashSet = new HashSet<>();
-                    hashSet.add("<wikicat_Polish_people>");
-                    hashSet.add("<wordnet_canoeist_109891470>");
-                    yagoEntities2Types.put("<wikicat_Polish_canoeists>", hashSet);
-
-
-                    HashSet<String> hashSet1 = new HashSet<>();
-                    hashSet1.add("<Traffic_sign>");
-                    yagoEntities2Types.put("<Highway_sign>", hashSet1);
-
-                    HashSet<String> hashSet2 = new HashSet<>();
-                    hashSet2.add("<wikicat_Color_codes>");
-                    hashSet2.add("<wikicat_Traffic_signs>");
-                    hashSet2.add("<wikicat_Symbols>");
-                    yagoEntities2Types.put("<Traffic_sign>", hashSet2);
-
-                    HashSet<String> hashSet3 = new HashSet<>();
-                    hashSet3.add("<wordnet_person_100007846>");
-                    yagoEntities2Types.put("<wikicat_Polish_people>", hashSet3);
-
-                    HashSet<String> hashSet4 = new HashSet<>();
-                    hashSet4.add("<wordnet_philosophy_106158346>");
-                    yagoEntities2Types.put("<wordnet_epistemology_106166748>", hashSet4);
-
-                    HashSet<String> hashSet5 = new HashSet<>();
-                    hashSet5.add("<wordnet_philosophy_106158346>");
-                    yagoEntities2Types.put("<wordnet_logic_106163751>", hashSet5);
-
-                    HashSet<String> hashSet6 = new HashSet<>();
-                    hashSet6.add("<wordnet_humanistic_discipline_106153846>");
-                    yagoEntities2Types.put("<wordnet_philosophy_106158346>", hashSet6);
-
-                    HashSet<String> hashSet7 = new HashSet<>();
-                    hashSet7.add("<wordnet_philosophy_106158346>");
-                    yagoEntities2Types.put("<wordnet_metaphysics_106162653>", hashSet7);
-
-                    HashSet<String> hashSet8 = new HashSet<>();
-                    hashSet8.add("<wikicat_Books>");
-                    hashSet8.add("<wikicat_Magazines>");
-                    yagoEntities2Types.put("<Book_cover>", hashSet8);
-
-                    HashSet<String> hashSet9 = new HashSet<>();
-                    hashSet9.add("<wordnet_book_106410904>");
-                    yagoEntities2Types.put("<wikicat_Books>", hashSet9);
-
-                    HashSet<String> hashSet10 = new HashSet<>();
-                    hashSet10.add("<wordnet_magazine_106595351>");
-                    yagoEntities2Types.put("<wikicat_Magazines>", hashSet10);
-
-                    HashSet<String> hashSet11 = new HashSet<>();
-                    hashSet11.add("<wordnet_publication_106589574>");
-                    yagoEntities2Types.put("<wordnet_magazine_106595351>", hashSet11);
-
-                    HashSet<String> hashSet12 = new HashSet<>();
-                    hashSet12.add("<wordnet_publication_106589574>");
-                    yagoEntities2Types.put("<wordnet_book_106410904>", hashSet12);
-
-                    HashSet<String> hashSet13 = new HashSet<>();
-                    hashSet13.add("<wordnet_work_104599396>");
-                    yagoEntities2Types.put("<wordnet_publication_106589574>", hashSet13);
-
-                }
             }
+
+        }
+
+        if (PROPERTIES.getProperty("debugLocally").equals("true")) {
+            HashSet<String> hashSet = new HashSet<>();
+            hashSet.add("<wikicat_Polish_people>");
+            hashSet.add("<wordnet_canoeist_109891470>");
+            yagoEntities2Types.put("<wikicat_Polish_canoeists>", hashSet);
+
+
+            HashSet<String> hashSet1 = new HashSet<>();
+            hashSet1.add("<Traffic_sign>");
+            yagoEntities2Types.put("<Highway_sign>", hashSet1);
+
+            HashSet<String> hashSet2 = new HashSet<>();
+            hashSet2.add("<wikicat_Color_codes>");
+            hashSet2.add("<wikicat_Traffic_signs>");
+            hashSet2.add("<wikicat_Symbols>");
+            yagoEntities2Types.put("<Traffic_sign>", hashSet2);
+
+            HashSet<String> hashSet3 = new HashSet<>();
+            hashSet3.add("<wordnet_person_100007846>");
+            yagoEntities2Types.put("<wikicat_Polish_people>", hashSet3);
+
+            HashSet<String> hashSet4 = new HashSet<>();
+            hashSet4.add("<wordnet_philosophy_106158346>");
+            yagoEntities2Types.put("106166748", hashSet4);
+
+            HashSet<String> hashSet5 = new HashSet<>();
+            hashSet5.add("<wordnet_philosophy_106158346>");
+            yagoEntities2Types.put("106163751", hashSet5);
+
+            HashSet<String> hashSet6 = new HashSet<>();
+            hashSet6.add("<wordnet_humanistic_discipline_106153846>");
+            yagoEntities2Types.put("106158346", hashSet6);
+
+            HashSet<String> hashSet7 = new HashSet<>();
+            hashSet7.add("<wordnet_philosophy_106158346>");
+            yagoEntities2Types.put("106162653", hashSet7);
+
+            HashSet<String> hashSet8 = new HashSet<>();
+            hashSet8.add("<wikicat_Books>");
+            hashSet8.add("<wikicat_Magazines>");
+            yagoEntities2Types.put("<Book_cover>", hashSet8);
+
+            HashSet<String> hashSet9 = new HashSet<>();
+            hashSet9.add("<wordnet_book_106410904>");
+            yagoEntities2Types.put("<wikicat_Books>", hashSet9);
+
+            HashSet<String> hashSet10 = new HashSet<>();
+            hashSet10.add("<wordnet_magazine_106595351>");
+            yagoEntities2Types.put("<wikicat_Magazines>", hashSet10);
+
+            HashSet<String> hashSet11 = new HashSet<>();
+            hashSet11.add("<wordnet_publication_106589574>");
+            yagoEntities2Types.put("106595351", hashSet11);
+
+            HashSet<String> hashSet12 = new HashSet<>();
+            hashSet12.add("<wordnet_publication_106589574>");
+            yagoEntities2Types.put("106410904", hashSet12);
+
+            HashSet<String> hashSet13 = new HashSet<>();
+            hashSet13.add("<wordnet_work_104599396>");
+            yagoEntities2Types.put("106589574", hashSet13);
 
         }
     }

@@ -66,8 +66,11 @@ public class ResultSummarizer {
             // Add this synset to hash set
             synSetforImage.add(tag);
 
+            //extract the id and assign to the tag
+            tag = extractWNID(tag);
         }
 
+        //TODO: if the tag is a wordnet, only use wordnet id to look up its parents. If not a wordnet id, use all tag
         HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
         List<String> parentYagoEntities = new ArrayList<>(objectsHashSet);
 
@@ -111,13 +114,25 @@ public class ResultSummarizer {
         writeHashMaptoFile(summarizationWeight, "./output/summary_by_weight.tsv");
     }
 
+    private String extractWNID(String original_tag) {
+        String[] splits = original_tag.split("_");
+        String WNID = splits[splits.length-1];
+        WNID = WNID.substring(0, WNID.length()-1);
+
+        return WNID;
+    }
+
     private boolean isValidTag(String tag) {
         // if it's too short, it's often unmeaningful
         if (tag.length() < 3) {
             return false;
         }
 
-        // If it does not exist, it's a bad
+        if (isWordNetSynset(tag)){
+            tag = extractWNID(tag);
+        }
+
+        // If it does not exist, it's bad
         if (yagoEntities2Types.get(tag) == null) {
             if (!tag.equals("owl:Thing")) {
                 logger.error("Error - tag does not exist: " + tag);
