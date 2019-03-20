@@ -217,12 +217,11 @@ public class ProcessBatchImageRunnable implements Runnable {
         summarizationWeight = new HashMap<>();
         summarizationCount = new HashMap<>();
 
-        long startTime;
-        long endTime;
-
-        startTime = System.currentTimeMillis();
-
         for (String line: this.originalImgCatsArray) {
+            long startTime;
+            long endTime;
+
+            startTime = System.currentTimeMillis();
 
             synSetforImage.clear();
 
@@ -242,11 +241,13 @@ public class ProcessBatchImageRunnable implements Runnable {
             } catch (StackOverflowError ex) {
                 logger.error("SOF for line:" + line);
             }
+
+            endTime = System.currentTimeMillis();
+
+            logger.info("Finished processing one image. It takes " + (endTime - startTime));
         }
 
-        endTime = System.currentTimeMillis();
 
-        System.out.println("Process one batch of images takes " + (endTime - startTime));
 
         //save the summarization results for this batch
         synchronized (ProcessBatchImageRunnable.LockSaveSummarizationResults) {
