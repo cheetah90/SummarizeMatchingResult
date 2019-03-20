@@ -2,14 +2,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.sql.*;
 import java.util.*;
 
 public class ResultSummarizer {
 
     private static final Logger logger = LogManager.getLogger(ResultSummarizer.class);
 
-    private final static HashMap<String, HashSet<String>> yagoEntities2Types = new HashMap<>();
+    private final static HashMap<String, HashSet<String>> yagoWNID2Hypernyms = new HashMap<>();
+
+    private final static HashMap<String, String> yagoWNID2Names = new HashMap<>();
 
     private final static HashMap<String, Double> summarizationWeight = new HashMap<>();
 
@@ -21,13 +22,17 @@ public class ResultSummarizer {
 
     private ResultSummarizer(){
 
-        IOUtilities.loadYagotoMemory(yagoEntities2Types);
+        IOUtilities.loadYagotoMemory(yagoWNID2Hypernyms, yagoWNID2Names);
 
         IOUtilities.loadContextTagstoMemory(contextTags);
     }
 
     private boolean isWordNetSynset(String object) {
-        return object.startsWith("<wordnet_");
+        return  object.startsWith("<wordnet_");
+    }
+
+    private boolean isWNID(String object) {
+        return isInteger(object);
     }
 
     private void updateSummaryCount(String tag){
@@ -52,26 +57,34 @@ public class ResultSummarizer {
         }
     }
 
+    private boolean isInteger(String s) {
+        boolean isValidInteger = false;
+
+        try {
+            Integer.parseInt(s);
+            isValidInteger = true;
+        } catch (NumberFormatException ex) {
+            // just pass
+        }
+        return isValidInteger;
+    }
+
     private void processOneTag(String tag, Double weight) {
         // Hack to deal with the number inconsistencies of wordnet_postage. Fixed in MatchYago
-        if (tag.startsWith("<wordnet_postage")) {
-            tag = "<wordnet_postage_106796119>";
-        }
+//        if (tag.startsWith("<wordnet_postage")) {
+//            tag = "<wordnet_postage_106796119>";
+//        }
 
         // If this is a wordnet, then update the summarization results
-        if (isWordNetSynset(tag)) {
+        if (isWNID(tag)) {
             updateSummaryCount(tag);
             updateSummaryWeight(tag, weight);
 
             // Add this synset to hash set
             synSetforImage.add(tag);
-
-            //extract the id and assign to the tag
-            tag = extractWNID(tag);
         }
 
-        //TODO: if the tag is a wordnet, only use wordnet id to look up its parents. If not a wordnet id, use all tag
-        HashSet<String> objectsHashSet = yagoEntities2Types.get(tag);
+        HashSet<String> objectsHashSet = yagoWNID2Hypernyms.get(tag);
         List<String> parentYagoEntities = new ArrayList<>(objectsHashSet);
 
         if (parentYagoEntities.size() != 0) {
@@ -94,7 +107,8 @@ public class ResultSummarizer {
 
             while (iterator.hasNext()) {
                 Map.Entry pair = (Map.Entry) iterator.next();
-                String content = pair.getKey() + "\t" + pair.getValue() + "\n";
+                String recoverWNName = "<wordnet_" + yagoWNID2Names.get(pair.getKey()) + pair.getKey() + ">";
+                String content = recoverWNName + "\t" + pair.getValue() + "\n";
                 bw.write(content);
                 iterator.remove();
             }
@@ -128,12 +142,8 @@ public class ResultSummarizer {
             return false;
         }
 
-        if (isWordNetSynset(tag)){
-            tag = extractWNID(tag);
-        }
-
         // If it does not exist, it's bad
-        if (yagoEntities2Types.get(tag) == null) {
+        if (yagoWNID2Hypernyms.get(tag) == null) {
             if (!tag.equals("owl:Thing")) {
                 logger.error("Error - tag does not exist: " + tag);
             }
@@ -176,6 +186,10 @@ public class ResultSummarizer {
         ArrayList<String> validTags = new ArrayList<>();
 
         for (String tag: tagsArray) {
+            if (isWordNetSynset(tag)){
+                tag = extractWNID(tag);
+            }
+
             if (isValidTag(tag)) {
                 validTags.add(tag);
             }

@@ -43,99 +43,82 @@ public class IOUtilities {
         );
     }
 
-    private static void loadEnWikiResultSet(ResultSet rs, HashMap<String, HashSet<String>> yagoEntities2Types) throws SQLException {
+    private static String extractWNIDAndRecordMapping(String original_tag,
+                                                      HashMap<String, String> yagoWNID2Names) {
+        String[] splits = original_tag.split("_");
+        String wnid= splits[splits.length-1];
+        wnid = wnid.substring(0, wnid.length()-1);
+
+        // save the mapping
+        String name = "";
+        for (int i = 1; i < (splits.length -1); i++){
+            name += splits[i] + "_";
+        }
+
+        if (yagoWNID2Names.get(wnid) == null) {
+            yagoWNID2Names.put(wnid, name);
+        }
+
+        return wnid;
+    }
+
+    private static void loadToJavaObjects(String subject,
+                                          String object,
+                                          HashMap<String, HashSet<String>> yagoWNID2Hypernyms,
+                                          HashMap<String, String> yagoWNID2Names){
+        // first add to yagoLowercase2Original
+        if (subject.startsWith("<wordnet_")) {
+            subject = extractWNIDAndRecordMapping(subject, yagoWNID2Names);
+        }
+
+        if (object.startsWith("<wordnet_")) {
+            object = extractWNIDAndRecordMapping(object, yagoWNID2Names);
+        }
+
+        if (yagoWNID2Hypernyms.get(subject) == null) {
+            // the lowercase does not exist
+            HashSet<String> hashSet = new HashSet<>();
+            hashSet.add(object);
+            yagoWNID2Hypernyms.put(subject, hashSet);
+        } else {
+            yagoWNID2Hypernyms.get(subject).add(object);
+        }
+    }
+
+    private static void loadEnWikiResultSet(ResultSet rs,
+                                            HashMap<String, HashSet<String>> yagoWNID2Hypernyms,
+                                            HashMap<String, String> yagoWNID2Names
+                                            ) throws SQLException {
         while (rs.next()) {
             String subject = rs.getString("subject");
             String object = rs.getString("object");
             String predicate = rs.getString("predicate");
 
             if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
-                // first add to yagoLowercase2Original
-                if (subject.startsWith("<wordnet_")) {
-                    String[] splits = subject.split("_");
-                    subject = splits[splits.length-1];
-                    subject = subject.substring(0, subject.length()-1);
-                }
-
-                if (yagoEntities2Types.get(subject) == null) {
-                    // the lowercase does not exist
-                    HashSet<String> hashSet = new HashSet<>();
-                    hashSet.add(object);
-                    yagoEntities2Types.put(subject, hashSet);
-                } else {
-                    yagoEntities2Types.get(subject).add(object);
-                }
-
+                loadToJavaObjects(subject, object, yagoWNID2Hypernyms, yagoWNID2Names);
             }
 
         }
 
         if (PROPERTIES.getProperty("debugLocally").equals("true")) {
-            HashSet<String> hashSet = new HashSet<>();
-            hashSet.add("<wikicat_Polish_people>");
-            hashSet.add("<wordnet_canoeist_109891470>");
-            yagoEntities2Types.put("<wikicat_Polish_canoeists>", hashSet);
-
-
-            HashSet<String> hashSet1 = new HashSet<>();
-            hashSet1.add("<Traffic_sign>");
-            yagoEntities2Types.put("<Highway_sign>", hashSet1);
-
-            HashSet<String> hashSet2 = new HashSet<>();
-            hashSet2.add("<wikicat_Color_codes>");
-            hashSet2.add("<wikicat_Traffic_signs>");
-            hashSet2.add("<wikicat_Symbols>");
-            yagoEntities2Types.put("<Traffic_sign>", hashSet2);
-
-            HashSet<String> hashSet3 = new HashSet<>();
-            hashSet3.add("<wordnet_person_100007846>");
-            yagoEntities2Types.put("<wikicat_Polish_people>", hashSet3);
-
-            HashSet<String> hashSet4 = new HashSet<>();
-            hashSet4.add("<wordnet_philosophy_106158346>");
-            yagoEntities2Types.put("106166748", hashSet4);
-
-            HashSet<String> hashSet5 = new HashSet<>();
-            hashSet5.add("<wordnet_philosophy_106158346>");
-            yagoEntities2Types.put("106163751", hashSet5);
-
-            HashSet<String> hashSet6 = new HashSet<>();
-            hashSet6.add("<wordnet_humanistic_discipline_106153846>");
-            yagoEntities2Types.put("106158346", hashSet6);
-
-            HashSet<String> hashSet7 = new HashSet<>();
-            hashSet7.add("<wordnet_philosophy_106158346>");
-            yagoEntities2Types.put("106162653", hashSet7);
-
-            HashSet<String> hashSet8 = new HashSet<>();
-            hashSet8.add("<wikicat_Books>");
-            hashSet8.add("<wikicat_Magazines>");
-            yagoEntities2Types.put("<Book_cover>", hashSet8);
-
-            HashSet<String> hashSet9 = new HashSet<>();
-            hashSet9.add("<wordnet_book_106410904>");
-            yagoEntities2Types.put("<wikicat_Books>", hashSet9);
-
-            HashSet<String> hashSet10 = new HashSet<>();
-            hashSet10.add("<wordnet_magazine_106595351>");
-            yagoEntities2Types.put("<wikicat_Magazines>", hashSet10);
-
-            HashSet<String> hashSet11 = new HashSet<>();
-            hashSet11.add("<wordnet_publication_106589574>");
-            yagoEntities2Types.put("106595351", hashSet11);
-
-            HashSet<String> hashSet12 = new HashSet<>();
-            hashSet12.add("<wordnet_publication_106589574>");
-            yagoEntities2Types.put("106410904", hashSet12);
-
-            HashSet<String> hashSet13 = new HashSet<>();
-            hashSet13.add("<wordnet_work_104599396>");
-            yagoEntities2Types.put("106589574", hashSet13);
+            loadToJavaObjects("<wordnet_epistemology_106166748>", "<wordnet_philosophy_106158346>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wordnet_logic_106163751>", "<wordnet_philosophy_106158346>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wordnet_philosophy_106158346>", "<wordnet_humanistic_discipline_106153846>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wordnet_metaphysics_106162653>", "<wordnet_philosophy_106158346>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<Book_cover>", "<wikicat_Books>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<Book_cover>", "<wikicat_Magazines>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wikicat_Books>", "<wordnet_book_106410904>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wikicat_Magazines>", "<wordnet_magazine_106595351>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wordnet_magazine_106595351>", "<wordnet_publication_106589574>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wordnet_book_106410904>", "<wordnet_publication_106589574>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wordnet_publication_106589574>", "<wordnet_work_104599396>", yagoWNID2Hypernyms, yagoWNID2Names);
 
         }
     }
 
-    private static void loadForeignWikiResultSet(ResultSet rs, HashMap<String, HashSet<String>> yagoEntities2Types) throws SQLException {
+    private static void loadForeignWikiResultSet(ResultSet rs,
+                                                 HashMap<String, HashSet<String>> yagoWNID2Hypernyms,
+                                                 HashMap<String, String> yagoWNID2Names) throws SQLException {
         while (rs.next()) {
             String subject = rs.getString("subject");
             String object = rs.getString("object");
@@ -146,16 +129,7 @@ public class IOUtilities {
                 if (subject.length() > 5 && subject.substring(1,4).matches("[a-zA-Z]{2}/")) {
                     String strip_subject = "<"+subject.substring(4);
 
-                    // first add to yagoLowercase2Original
-                    // if this foreign entity does not exist in en.wiki, add it without the lang code
-                    if (yagoEntities2Types.get(strip_subject) == null) {
-                        // the lowercase does not exist
-                        HashSet<String> hashSet = new HashSet<>();
-                        hashSet.add(object);
-                        yagoEntities2Types.put(strip_subject, hashSet);
-                    } else {
-                        yagoEntities2Types.get(strip_subject).add(object);
-                    }
+                    loadToJavaObjects(strip_subject, object, yagoWNID2Hypernyms, yagoWNID2Names);
                 }
             }
         }
@@ -219,7 +193,8 @@ public class IOUtilities {
         }
     }
 
-    static void loadYagotoMemory(HashMap<String, HashSet<String>> yagoEntities2Type){
+    static void loadYagotoMemory(HashMap<String,HashSet<String>> yagoWNID2Hypernyms,
+                                 HashMap<String, String> yagoWNID2Names){
 
         try {
             if (PROPERTIES == null) {
@@ -244,7 +219,7 @@ public class IOUtilities {
                 stmt = yagoConnection.prepareStatement(query_yagotype);
                 ResultSet rs = stmt.executeQuery();
                 //Load the resultset
-                loadEnWikiResultSet(rs, yagoEntities2Type);
+                loadEnWikiResultSet(rs, yagoWNID2Hypernyms, yagoWNID2Names);
                 rs.close();
                 stmt.close();
 
@@ -255,7 +230,7 @@ public class IOUtilities {
                 stmt = yagoConnection.prepareStatement(query_yagotype);
                 ResultSet rs = stmt.executeQuery();
                 //Load the resultset
-                loadEnWikiResultSet(rs, yagoEntities2Type);
+                loadEnWikiResultSet(rs, yagoWNID2Hypernyms, yagoWNID2Names);
                 rs.close();
                 stmt.close();
 
@@ -264,7 +239,7 @@ public class IOUtilities {
                 stmt = yagoConnection.prepareStatement(query_yagotype);
                 rs = stmt.executeQuery();
                 //Load the resultset
-                loadForeignWikiResultSet(rs, yagoEntities2Type);
+                loadForeignWikiResultSet(rs, yagoWNID2Hypernyms, yagoWNID2Names);
                 rs.close();
                 stmt.close();
 
@@ -272,7 +247,7 @@ public class IOUtilities {
                 String query_yagotaxonomy = "SELECT * FROM YAGOTAXONOMY";
                 stmt = yagoConnection.prepareStatement(query_yagotaxonomy);
                 rs = stmt.executeQuery();
-                loadEnWikiResultSet(rs, yagoEntities2Type);
+                loadEnWikiResultSet(rs, yagoWNID2Hypernyms, yagoWNID2Names);
                 rs.close();
                 stmt.close();
             }
