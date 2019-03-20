@@ -141,6 +141,11 @@ public class ResultSummarizer {
             return false;
         }
 
+        // if it starts with "yago", it's bad since it won't be counted in the weights
+        if (tag.startsWith("yago")) {
+            return false;
+        }
+
         // If it does not exist, it's bad
         if (yagoWNID2Hypernyms.get(tag) == null) {
             if (!tag.equals("owl:Thing")) {
