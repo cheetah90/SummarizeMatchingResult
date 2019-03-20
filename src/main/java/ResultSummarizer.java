@@ -205,6 +205,7 @@ public class ResultSummarizer {
     private void processTagsRecursively(List<String> tagsArray, double sum_of_weights) {
         // Filter invalid tags
         List<String> validTagsArray = filterAllTags(tagsArray);
+        logger.debug("All valid tags:" + validTagsArray.toString());
 
         // Process each tag
         for (String tag: validTagsArray) {
