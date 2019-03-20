@@ -82,7 +82,6 @@ public class ResultSummarizer {
             BufferedReader br = new BufferedReader(new FileReader(fileInput));
             ArrayList<String> batch_imageCats = null;
             String a_line;
-            int counter = 0;
 
             while ((a_line = br.readLine()) != null) {
                 // Split by 100k lines
@@ -90,8 +89,8 @@ public class ResultSummarizer {
                     // if reachings 1m, shutdown the pool, wait until all tasks have completed
                     if (pool != null) {
                         // report the current status after this split.
-                        System.out.println("Started processing " + counter);
-                        logger.info("Started processing " + counter);
+                        System.out.println("Started processing " + line_counter);
+                        logger.info("Started processing " + line_counter);
 
                         //Finished creating the threads
                         pool.shutdown();
