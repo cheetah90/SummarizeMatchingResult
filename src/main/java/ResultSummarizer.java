@@ -3,7 +3,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -16,11 +15,15 @@ public class ResultSummarizer {
 
     private final static HashMap<String, String> yagoWNID2Names = new HashMap<>();
 
-    private final static HashMap<String, Double> summarizationWeight = new HashMap<>();
+    private final static HashMap<String, Double> summaryWeight = new HashMap<>();
 
-    private final static HashMap<String, Integer> summarizationCount = new HashMap<>();
+    private final static HashMap<String, Integer> summaryCount = new HashMap<>();
 
     private final static HashSet<String> contextTags = new HashSet<>();
+
+    final static ArrayList<HashMap<String, Integer>> array_summarizationCount = new ArrayList<>();
+
+    final static ArrayList<HashMap<String, Double>> array_summarizationWeight = new ArrayList<>();
 
     private ResultSummarizer(){
 
@@ -30,9 +33,8 @@ public class ResultSummarizer {
 
         ProcessBatchImageRunnable.setyagoWNID2Hypernyms(yagoWNID2Hypernyms);
 
-        ProcessBatchImageRunnable.setsummarizationCount(summarizationCount);
+        ProcessBatchImageRunnable.setcontextTags(contextTags);
 
-        ProcessBatchImageRunnable.setsummarizationWeight(summarizationWeight);
     }
 
     private void writeHashMaptoFile(HashMap summarization, String outputFile){
@@ -64,12 +66,35 @@ public class ResultSummarizer {
 
     private void writeToFile(){
         // Write the count summary
-        writeHashMaptoFile(summarizationCount, "./output/summary_by_count.tsv");
+        writeHashMaptoFile(summaryCount, "./output/summary_by_count.tsv");
 
         // Write the weight summary
-        writeHashMaptoFile(summarizationWeight, "./output/summary_by_weight.tsv");
+        writeHashMaptoFile(summaryWeight, "./output/summary_by_weight.tsv");
     }
 
+    private void summarizeCount(ArrayList<HashMap<String, Integer>> arraySummarization, HashMap<String, Integer> finalSummarization) {
+        for (HashMap<String, Integer> one_img_summary: arraySummarization) {
+            for (String key: one_img_summary.keySet()) {
+                if (finalSummarization.containsKey(key)) {
+                    finalSummarization.put(key, finalSummarization.get(key) + one_img_summary.get(key));
+                } else {
+                    finalSummarization.put(key, one_img_summary.get(key));
+                }
+            }
+        }
+    }
+
+    private void summarizeWeight(ArrayList<HashMap<String, Double>> arraySummarization, HashMap<String, Double> finalSummarization) {
+        for (HashMap<String, Double> one_img_summary: arraySummarization) {
+            for (String key: one_img_summary.keySet()) {
+                if (finalSummarization.containsKey(key)) {
+                    finalSummarization.put(key, finalSummarization.get(key) + one_img_summary.get(key));
+                } else {
+                    finalSummarization.put(key, one_img_summary.get(key));
+                }
+            }
+        }
+    }
 
     private void startSummarization(){
         String fileInput = "./output/replaced_entities_per_img_parcat.tsv";
@@ -137,6 +162,9 @@ public class ResultSummarizer {
             logger.error("Caught InterruptedException");
         }
 
+        // Finished processing, summarize the results
+        summarizeCount(array_summarizationCount, summaryCount);
+        summarizeWeight(array_summarizationWeight, summaryWeight);
 
     }
 

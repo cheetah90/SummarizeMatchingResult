@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ProcessBatchImageRunnable implements Runnable {
 
@@ -15,11 +14,13 @@ public class ProcessBatchImageRunnable implements Runnable {
 
     private static HashMap<String, HashSet<String>> yagoWNID2Hypernyms = null;
 
-    private static HashMap<String, Double> summarizationWeight = null;
+    private static HashSet<String> contextTags = null;
 
-    private static HashMap<String, Integer> summarizationCount = null;
+    private HashMap<String, Double> summarizationWeight = null;
 
-    private final static HashSet<String> contextTags = new HashSet<>();
+    private HashMap<String, Integer> summarizationCount = null;
+
+    static final Object LockSaveSummarizationResults = new Object();
 
     private HashSet<String> synSetforImage = new HashSet<>();
 
@@ -27,13 +28,10 @@ public class ProcessBatchImageRunnable implements Runnable {
         ProcessBatchImageRunnable.yagoWNID2Hypernyms = yagoWNID2Hypernyms;
     }
 
-    static void setsummarizationWeight(HashMap<String, Double> summarizationWeight){
-        ProcessBatchImageRunnable.summarizationWeight = summarizationWeight;
+    static void setcontextTags(HashSet<String> contextTags) {
+        ProcessBatchImageRunnable.contextTags = contextTags;
     }
 
-    static void setsummarizationCount(HashMap<String, Integer> summarizationCount){
-        ProcessBatchImageRunnable.summarizationCount = summarizationCount;
-    }
 
     private boolean isWordNetSynset(String object) {
         return  object.startsWith("<wordnet_");
@@ -153,7 +151,7 @@ public class ProcessBatchImageRunnable implements Runnable {
         return isInteger(object);
     }
 
-    static synchronized void updateSummaryCount(String tag){
+    private void updateSummaryCount(String tag){
         // Update the summarizationCount
         if (summarizationCount.get(tag) == null) {
             summarizationCount.put(tag, 1);
@@ -163,7 +161,7 @@ public class ProcessBatchImageRunnable implements Runnable {
         }
     }
 
-    static synchronized void updateSummaryWeight(String tag, Double weight){
+    private void updateSummaryWeight(String tag, Double weight){
         if (summarizationWeight.get(tag) == null) {
             summarizationWeight.put(tag, weight);
         } else {
@@ -216,8 +214,12 @@ public class ProcessBatchImageRunnable implements Runnable {
     }
 
     public void run() {
+        summarizationWeight = new HashMap<>();
+        summarizationCount = new HashMap<>();
+
         for (String line: this.originalImgCatsArray) {
             synSetforImage.clear();
+
             try {
                 String tagsLine = line.split("\t")[2];
                 List<String> regularTags = new ArrayList<>();
@@ -230,9 +232,18 @@ public class ProcessBatchImageRunnable implements Runnable {
                 for (List<String> one_parentTag: parentTags) {
                     processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
                 }
+
+                //save the summarization results for this batch
+                synchronized (ProcessBatchImageRunnable.LockSaveSummarizationResults) {
+                    ResultSummarizer.array_summarizationCount.add(summarizationCount);
+                    ResultSummarizer.array_summarizationWeight.add(summarizationWeight);
+                }
+
             } catch (StackOverflowError ex) {
                 logger.error("SOF for line:" + line);
             }
+
+
 
         }
     }
