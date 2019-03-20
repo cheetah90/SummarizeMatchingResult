@@ -216,9 +216,8 @@ public class ProcessBatchImageRunnable implements Runnable {
     }
 
     public void run() {
-        synSetforImage.clear();
-
         for (String line: this.originalImgCatsArray) {
+            synSetforImage.clear();
             try {
                 String tagsLine = line.split("\t")[2];
                 List<String> regularTags = new ArrayList<>();
