@@ -193,6 +193,11 @@ public class IOUtilities {
         }
     }
 
+    static String reconstructWNSynsetsName(String WNID,
+                                           HashMap<String, String> yagoWNID2Names){
+        return "<wordnet_" + yagoWNID2Names.get(WNID) + WNID + ">";
+    }
+
     static void loadYagotoMemory(HashMap<String,HashSet<String>> yagoWNID2Hypernyms,
                                  HashMap<String, String> yagoWNID2Names){
 

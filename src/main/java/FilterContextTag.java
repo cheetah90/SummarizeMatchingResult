@@ -13,12 +13,14 @@ public class FilterContextTag {
 
     private final static HashSet<String> contextTimeTags = new HashSet<>();
 
+    private final static HashMap<String, String> yagoWNID2Names = new HashMap<>();
+
     private final static HashSet<String> contextLocationTags = new HashSet<>();
 
 
 
     private FilterContextTag(){
-        IOUtilities.loadYagotoMemory(yagoEntities2Types);
+        IOUtilities.loadYagotoMemory(yagoEntities2Types, yagoWNID2Names);
     }
 
 

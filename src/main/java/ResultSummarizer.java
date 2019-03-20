@@ -107,8 +107,7 @@ public class ResultSummarizer {
 
             while (iterator.hasNext()) {
                 Map.Entry pair = (Map.Entry) iterator.next();
-                String recoverWNName = "<wordnet_" + yagoWNID2Names.get(pair.getKey()) + pair.getKey() + ">";
-                String content = recoverWNName + "\t" + pair.getValue() + "\n";
+                String content = IOUtilities.reconstructWNSynsetsName((String) pair.getKey(), yagoWNID2Names) + "\t" + pair.getValue() + "\n";
                 bw.write(content);
                 iterator.remove();
             }

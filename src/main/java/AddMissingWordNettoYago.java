@@ -11,9 +11,11 @@ public class AddMissingWordNettoYago {
 
     private final static HashMap<String, HashSet<String>> yagoEntities2Types = new HashMap<>();
 
+    private final static HashMap<String, String> yagoWNID2Names = new HashMap<>();
+
     private AddMissingWordNettoYago(){
 
-        IOUtilities.loadYagotoMemory(yagoEntities2Types);
+        IOUtilities.loadYagotoMemory(yagoEntities2Types, yagoWNID2Names);
 
     }
 
