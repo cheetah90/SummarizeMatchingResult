@@ -233,18 +233,15 @@ public class ProcessBatchImageRunnable implements Runnable {
                     processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
                 }
 
-                //save the summarization results for this batch
-                synchronized (ProcessBatchImageRunnable.LockSaveSummarizationResults) {
-                    ResultSummarizer.array_summarizationCount.add(summarizationCount);
-                    ResultSummarizer.array_summarizationWeight.add(summarizationWeight);
-                }
-
             } catch (StackOverflowError ex) {
                 logger.error("SOF for line:" + line);
             }
+        }
 
-
-
+        //save the summarization results for this batch
+        synchronized (ProcessBatchImageRunnable.LockSaveSummarizationResults) {
+            ResultSummarizer.array_summarizationCount.add(summarizationCount);
+            ResultSummarizer.array_summarizationWeight.add(summarizationWeight);
         }
     }
 
