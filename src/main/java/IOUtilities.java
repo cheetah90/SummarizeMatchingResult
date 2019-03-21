@@ -104,6 +104,7 @@ public class IOUtilities {
             loadToJavaObjects("<wordnet_epistemology_106166748>", "<wordnet_philosophy_106158346>", yagoWNID2Hypernyms, yagoWNID2Names);
             loadToJavaObjects("<wordnet_logic_106163751>", "<wordnet_philosophy_106158346>", yagoWNID2Hypernyms, yagoWNID2Names);
             loadToJavaObjects("<wordnet_philosophy_106158346>", "<wordnet_humanistic_discipline_106153846>", yagoWNID2Hypernyms, yagoWNID2Names);
+            loadToJavaObjects("<wordnet_humanistic_discipline_106153846>", "owl:", yagoWNID2Hypernyms, yagoWNID2Names);
             loadToJavaObjects("<wordnet_metaphysics_106162653>", "<wordnet_philosophy_106158346>", yagoWNID2Hypernyms, yagoWNID2Names);
             loadToJavaObjects("<Book_cover>", "<wikicat_Books>", yagoWNID2Hypernyms, yagoWNID2Names);
             loadToJavaObjects("<Book_cover>", "<wikicat_Magazines>", yagoWNID2Hypernyms, yagoWNID2Names);

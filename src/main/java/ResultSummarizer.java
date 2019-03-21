@@ -17,6 +17,8 @@ public class ResultSummarizer {
 
     private final static HashMap<String, Double> summaryWeight = new HashMap<>();
 
+    private final static HashMap<String, Double> finalSummaryWeight = new HashMap<>();
+
     private final static HashMap<String, Integer> summaryCount = new HashMap<>();
 
     private final static HashSet<String> contextTags = new HashSet<>();
@@ -154,13 +156,13 @@ public class ResultSummarizer {
 
             // Add this synset to hash set
             synSetforImage.add(tag);
-        }
+        } else {
+            HashSet<String> objectsHashSet = yagoWNID2Hypernyms.get(tag);
+            List<String> parentYagoEntities = new ArrayList<>(objectsHashSet);
 
-        HashSet<String> objectsHashSet = yagoWNID2Hypernyms.get(tag);
-        List<String> parentYagoEntities = new ArrayList<>(objectsHashSet);
-
-        if (parentYagoEntities.size() != 0) {
-            processTagsRecursively(parentYagoEntities, weight);
+            if (parentYagoEntities.size() != 0) {
+                processTagsRecursively(parentYagoEntities, weight);
+            }
         }
     }
 
@@ -205,48 +207,88 @@ public class ResultSummarizer {
 
         IOUtilities.loadContextTagstoMemory(contextTags);
 
-        ProcessBatchImageRunnable.setyagoWNID2Hypernyms(yagoWNID2Hypernyms);
-
-        ProcessBatchImageRunnable.setcontextTags(contextTags);
-
     }
 
-    private void writeHashMaptoFile(HashMap summarization, String outputFile){
-        //clearOutputfile
-        IOUtilities.clearOutputfile(outputFile);
+    private void writeHashMaptoFile(){
 
         BufferedWriter bw;
         FileWriter fw;
 
-        Iterator iterator = summarization.entrySet().iterator();
+        String outputfile_count = "./output/summary_by_count.tsv";
+        IOUtilities.clearOutputfile(outputfile_count);
+
+        String outputfile_weight = "./output/summary_by_weight.tsv";
+
 
         try {
-            fw = new FileWriter(outputFile);
+            fw = new FileWriter(outputfile_count);
             bw = new BufferedWriter(fw);
 
-            while (iterator.hasNext()) {
-                Map.Entry pair = (Map.Entry) iterator.next();
-                String content = IOUtilities.reconstructWNSynsetsName((String) pair.getKey(), yagoWNID2Names) + "\t" + pair.getValue() + "\n";
+            for (String key: summaryCount.keySet()) {
+                String content = IOUtilities.reconstructWNSynsetsName(key, yagoWNID2Names) + "\t" + summaryCount.get(key) + "\n";
                 bw.write(content);
-                iterator.remove();
             }
+            bw.close();
 
+            writeWeightHashMapToFile(summaryWeight, outputfile_weight);
+
+        } catch (IOException exception) {
+            logger.error("Error: can't create file: ");
+        }
+
+    }
+
+    private void writeWeightHashMapToFile(HashMap<String, Double> weightHashmap, String outputfile) {
+        IOUtilities.clearOutputfile(outputfile);
+        BufferedWriter bw;
+        FileWriter fw;
+
+        try {
+            fw = new FileWriter(outputfile);
+            bw = new BufferedWriter(fw);
+
+            for (String key: weightHashmap.keySet()) {
+                String content = IOUtilities.reconstructWNSynsetsName(key, yagoWNID2Names) + "\t" + weightHashmap.get(key) + "\n";
+                bw.write(content);
+            }
             bw.close();
 
         } catch (IOException exception) {
-            logger.error("Error: can't create file: " + outputFile);
+            logger.error("Error: can't create file: ");
         }
+
     }
 
-    private void writeToFile(){
-        // Write the count summary
-        writeHashMaptoFile(summaryCount, "./output/summary_by_count.tsv");
+    private void recursivelyUpdate(String key, double weight) {
+        // first, update the corresponding weight in the final summary
+        if (finalSummaryWeight.containsKey(key)){
+            finalSummaryWeight.put(key, finalSummaryWeight.get(key) + weight);
+        } else {
+            finalSummaryWeight.put(key, weight);
+        }
 
-        // Write the weight summary
-        writeHashMaptoFile(summaryWeight, "./output/summary_by_weight.tsv");
+        // then get the parents of the keys
+        HashSet<String> parents =  yagoWNID2Hypernyms.get(key);
+        if (parents != null) {
+            for (String parent: parents) {
+                if (!parent.startsWith("<yago") && !parent.startsWith("owl:")){
+                    recursivelyUpdate(parent, weight);
+                }
+            }
+        }
+
     }
 
-    private void startSummarization(){
+    private void summarizeWeightsInWNOntology(){
+        for (String key: summaryWeight.keySet()) {
+            recursivelyUpdate(key, summaryWeight.get(key));
+        }
+
+        writeWeightHashMapToFile(finalSummaryWeight, "output/final_summary_weight.tsv");
+
+    }
+
+    private void summarizeToNearestWN(){
         String fileInput = "./output/replaced_entities_per_img_parcat.tsv";
         int line_counter = 0;
 
@@ -286,6 +328,14 @@ public class ResultSummarizer {
             logger.error("filenames.txt does not exist!");
         }
 
+        writeHashMaptoFile();
+    }
+
+    private void startSummarization(){
+        summarizeToNearestWN();
+
+        summarizeWeightsInWNOntology();
+
     }
 
     public static void main(String[] args){
@@ -300,7 +350,6 @@ public class ResultSummarizer {
 
         ResultSummarizer resultSummarizer = new ResultSummarizer();
         resultSummarizer.startSummarization();
-        resultSummarizer.writeToFile();
     }
 
 }
