@@ -264,17 +264,18 @@ public class ResultSummarizer {
 
                 try {
                     String tagsLine = a_line.split("\t")[1];
-                    List<String> regularTags = new ArrayList<>();
-                    List<List<String>> parentTags = new ArrayList<>();
-                    splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
+                    if (tagsLine.length() == 2) {
+                        List<String> regularTags = new ArrayList<>();
+                        List<List<String>> parentTags = new ArrayList<>();
+                        splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
 
-                    //Process regular tags
-                    double weights_regularTags = ((double) regularTags.size()) / (regularTags.size() + parentTags.size());
-                    processTagsRecursively(regularTags, weights_regularTags);
-                    for (List<String> one_parentTag: parentTags) {
-                        processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
+                        //Process regular tags
+                        double weights_regularTags = ((double) regularTags.size()) / (regularTags.size() + parentTags.size());
+                        processTagsRecursively(regularTags, weights_regularTags);
+                        for (List<String> one_parentTag: parentTags) {
+                            processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
+                        }
                     }
-
                 } catch (StackOverflowError ex) {
                     logger.error("SOF for line:" + a_line);
                 }
