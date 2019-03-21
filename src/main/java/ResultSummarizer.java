@@ -21,9 +21,183 @@ public class ResultSummarizer {
 
     private final static HashSet<String> contextTags = new HashSet<>();
 
-    final static ArrayList<HashMap<String, Integer>> array_summarizationCount = new ArrayList<>();
+    private HashSet<String> synSetforImage = new HashSet<>();
 
-    final static ArrayList<HashMap<String, Double>> array_summarizationWeight = new ArrayList<>();
+
+    private boolean isWordNetSynset(String object) {
+        return  object.startsWith("<wordnet_");
+    }
+
+    private String extractWNID(String original_tag) {
+        String[] splits = original_tag.split("_");
+        String WNID = splits[splits.length-1];
+        WNID = WNID.substring(0, WNID.length()-1);
+
+        return WNID;
+    }
+
+    private boolean isValidTag(String tag) {
+        // if it's too short, it's often unmeaningful
+        if (tag.length() < 3) {
+            return false;
+        }
+
+        // if it starts with "yago", it's bad since it won't be counted in the weights
+        if (tag.startsWith("<yago")) {
+            return false;
+        }
+
+        // If it does not exist, it's bad
+        if (yagoWNID2Hypernyms.get(tag) == null) {
+            if (!tag.equals("owl:Thing")) {
+                logger.error("Error - tag does not exist: " + tag);
+            }
+            return false;
+        }
+
+        // If it's a context tag, it's bad
+        if (IOUtilities.PROPERTIES.getProperty("excludeContextTags").equals("true")) {
+            if (contextTags.contains(tag)) {
+                return false;
+            }
+        }
+
+        return true;
+
+    }
+
+    private List<String> loadArrayListFromtoString(String strLine, String leftDelimiter, String rightDelimiter) {
+        strLine = strLine.substring(1,strLine.length()-1);
+
+        ArrayList<String> tagsList = new ArrayList<>();
+
+        String[] tagsParsed = strLine.split(rightDelimiter+", \\"+leftDelimiter);
+        for (String tag: tagsParsed) {
+            if (!tag.startsWith(leftDelimiter)) {
+                tag = leftDelimiter + tag;
+            }
+
+            if (!tag.endsWith(rightDelimiter)) {
+                tag = tag + rightDelimiter;
+            }
+
+            tagsList.add(tag);
+        }
+
+        return tagsList;
+    }
+
+    private List<String> filterAllTags(List<String> tagsArray){
+        ArrayList<String> validTags = new ArrayList<>();
+
+        for (String tag: tagsArray) {
+            if (isWordNetSynset(tag)){
+                tag = extractWNID(tag);
+            }
+
+            if (isValidTag(tag)) {
+                validTags.add(tag);
+            }
+        }
+
+        return validTags;
+    }
+
+    private void processTagsRecursively(List<String> tagsArray, double sum_of_weights) {
+        // Filter invalid tags
+        List<String> validTagsArray = filterAllTags(tagsArray);
+
+        // Process each tag
+        for (String tag: validTagsArray) {
+            // If not, then process each of its object
+            processOneTag(tag, sum_of_weights/(double) validTagsArray.size());
+        }
+
+    }
+
+    private boolean isParentCats(String tag) {
+        return tag.startsWith("<[{");
+    }
+
+    private void splitRegularCatandParentCats(String tagsLine, List<String> regularCats, List<List<String>> parentCats){
+        tagsLine = tagsLine.substring(1,tagsLine.length()-1);
+
+        List<String> tagsArray = loadArrayListFromtoString(tagsLine, "<", ">");
+
+        for (String tag: tagsArray) {
+            if (isParentCats(tag)) {
+                tag = tag.substring(1,tag.length()-1);
+                List<String> new_parentTags = new ArrayList<>();
+                for (String parTag: loadArrayListFromtoString(tag, "{", "}")) {
+                    new_parentTags.add(parTag.replace('{', '<').replace('}', '>'));
+                }
+                parentCats.add(new_parentTags);
+            } else {
+                regularCats.add(tag);
+            }
+        }
+    }
+
+    private void processOneTag(String tag, Double weight) {
+        // Hack to deal with the number inconsistencies of wordnet_postage. Fixed in MatchYago
+//        if (tag.startsWith("<wordnet_postage")) {
+//            tag = "<wordnet_postage_106796119>";
+//        }
+
+        // If this is a wordnet, then update the summarization results
+        if (isWNID(tag)) {
+            // If a new synset, add the count
+            if (!synSetforImage.contains(tag)) {
+                updateSummaryCount(tag);
+            }
+            updateSummaryWeight(tag, weight);
+
+            // Add this synset to hash set
+            synSetforImage.add(tag);
+        }
+
+        HashSet<String> objectsHashSet = yagoWNID2Hypernyms.get(tag);
+        List<String> parentYagoEntities = new ArrayList<>(objectsHashSet);
+
+        if (parentYagoEntities.size() != 0) {
+            processTagsRecursively(parentYagoEntities, weight);
+        }
+    }
+
+    private boolean isWNID(String object) {
+        return isInteger(object);
+    }
+
+    private void updateSummaryCount(String tag){
+        // Update the summarizationCount
+        if (summaryCount.get(tag) == null) {
+            summaryCount.put(tag, 1);
+        } else {
+            int currentCount = summaryCount.get(tag);
+            summaryCount.put(tag, currentCount+1);
+        }
+    }
+
+    private void updateSummaryWeight(String tag, Double weight){
+        if (summaryWeight.get(tag) == null) {
+            summaryWeight.put(tag, weight);
+        } else {
+            double currentWeight = summaryWeight.get(tag);
+            summaryWeight.put(tag, currentWeight+ weight);
+        }
+    }
+
+    private boolean isInteger(String s) {
+        boolean isValidInteger = false;
+
+        try {
+            Integer.parseInt(s);
+            isValidInteger = true;
+        } catch (NumberFormatException ex) {
+            // just pass
+        }
+        return isValidInteger;
+    }
 
     private ResultSummarizer(){
 
@@ -72,99 +246,45 @@ public class ResultSummarizer {
         writeHashMaptoFile(summaryWeight, "./output/summary_by_weight.tsv");
     }
 
-    private void summarizeCount(ArrayList<HashMap<String, Integer>> arraySummarization, HashMap<String, Integer> finalSummarization) {
-        for (HashMap<String, Integer> one_img_summary: arraySummarization) {
-            for (String key: one_img_summary.keySet()) {
-                if (finalSummarization.containsKey(key)) {
-                    finalSummarization.put(key, finalSummarization.get(key) + one_img_summary.get(key));
-                } else {
-                    finalSummarization.put(key, one_img_summary.get(key));
-                }
-            }
-        }
-    }
-
-    private void summarizeWeight(ArrayList<HashMap<String, Double>> arraySummarization, HashMap<String, Double> finalSummarization) {
-        for (HashMap<String, Double> one_img_summary: arraySummarization) {
-            for (String key: one_img_summary.keySet()) {
-                if (finalSummarization.containsKey(key)) {
-                    finalSummarization.put(key, finalSummarization.get(key) + one_img_summary.get(key));
-                } else {
-                    finalSummarization.put(key, one_img_summary.get(key));
-                }
-            }
-        }
-    }
-
     private void startSummarization(){
         String fileInput = "./output/replaced_entities_per_img_parcat.tsv";
-
-        ExecutorService pool = null;
         int line_counter = 0;
 
         try {
             // Buffered read the file
             BufferedReader br = new BufferedReader(new FileReader(fileInput));
-            ArrayList<String> batch_imageCats = null;
             String a_line;
 
             while ((a_line = br.readLine()) != null) {
-                // Split by 100k lines
-                if (line_counter % Integer.parseInt(IOUtilities.PROPERTIES.getProperty("numImgsInSplit"))== 0) {
-                    // if reachings 1m, shutdown the pool, wait until all tasks have completed
-                    if (pool != null) {
-                        // report the current status after this split.
-                        System.out.println("Started processing " + line_counter);
-                        logger.info("Started processing " + line_counter);
-
-                        //Finished creating the threads
-                        pool.shutdown();
-                        // Wait until these tasks finished
-                        if (!pool.awaitTermination(100, TimeUnit.MINUTES)) {
-                            System.out.println("Error: reached the ExecutorService timeout!");
-                            logger.error("Error: reached the ExecutorService timeout!");
-                            pool.shutdownNow();
-                        }
-                    }
-
-                    pool = Executors.newFixedThreadPool(Integer.parseInt(IOUtilities.PROPERTIES.getProperty("maxThreadPool")));
+                if (line_counter % 10000 == 0) {
+                    logger.info("Finished processing: " + line_counter);
                 }
 
-                // For every 100, assign to a thread
-                if (line_counter % Integer.parseInt(IOUtilities.PROPERTIES.getProperty("numImgsInBatch"))== 0) {
-                    if (batch_imageCats != null && batch_imageCats.size() > 0) {
-                        pool.execute(new ProcessBatchImageRunnable(new ArrayList<>(batch_imageCats)));
-                    }
-                    //Create a new batch_imageCats for next batch
-                    batch_imageCats = new ArrayList<>();
-                }
+                synSetforImage.clear();
 
-                batch_imageCats.add(a_line);
+                try {
+                    String tagsLine = a_line.split("\t")[2];
+                    List<String> regularTags = new ArrayList<>();
+                    List<List<String>> parentTags = new ArrayList<>();
+                    splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
+
+                    //Process regular tags
+                    double weights_regularTags = ((double) regularTags.size()) / (regularTags.size() + parentTags.size());
+                    processTagsRecursively(regularTags, weights_regularTags);
+                    for (List<String> one_parentTag: parentTags) {
+                        processTagsRecursively(one_parentTag, ((double) 1) / (regularTags.size() + parentTags.size()));
+                    }
+
+                } catch (StackOverflowError ex) {
+                    logger.error("SOF for line:" + a_line);
+                }
 
                 line_counter++;
-
-            }
-
-            // process the remaining batch
-            pool.execute(new ProcessBatchImageRunnable(new ArrayList<>(batch_imageCats)));
-            //Finished creating the threads
-            pool.shutdown();
-            // Wait until these tasks finished
-            if (!pool.awaitTermination(100, TimeUnit.MINUTES)) {
-                System.out.println("Error: reached the ExecutorService timeout!");
-                logger.error("Error: reached the ExecutorService timeout!");
-                pool.shutdownNow();
             }
 
         } catch (IOException exception) {
             logger.error("filenames.txt does not exist!");
-        } catch (InterruptedException exception) {
-            logger.error("Caught InterruptedException");
         }
-
-        // Finished processing, summarize the results
-        summarizeCount(array_summarizationCount, summaryCount);
-        summarizeWeight(array_summarizationWeight, summaryWeight);
 
     }
 
