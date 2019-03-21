@@ -263,7 +263,7 @@ public class ResultSummarizer {
                 synSetforImage.clear();
 
                 try {
-                    String tagsLine = a_line.split("\t")[2];
+                    String tagsLine = a_line.split("\t")[1];
                     List<String> regularTags = new ArrayList<>();
                     List<List<String>> parentTags = new ArrayList<>();
                     splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
