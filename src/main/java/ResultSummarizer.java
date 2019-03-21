@@ -268,13 +268,17 @@ public class ResultSummarizer {
         }
 
         // then get the parents of the keys
-        HashSet<String> parents =  yagoWNID2Hypernyms.get(key);
+        HashSet<String> parentsHashset =  yagoWNID2Hypernyms.get(key);
+        List<String> parents_array = new ArrayList<>(parentsHashset);
+        parents_array = filterAllTags(parents_array);
+
         logger.info("Current tag is :" + yagoWNID2Names.get(key) + "|||| Weight = " + weight);
-        logger.info("Its parents are: " + parents.toString());
+        logger.info("Its valid parents are: " + parents_array.toString());
+
         if (parents != null) {
-            for (String parent: parents) {
+            for (String parent: parents_array) {
                 if (!parent.startsWith("<yago") && !parent.startsWith("owl:")){
-                    recursivelyUpdate(parent, weight);
+                    recursivelyUpdate(parent, weight / parents_array.size());
                 }
             }
         }
