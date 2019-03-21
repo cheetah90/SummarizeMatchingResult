@@ -275,7 +275,7 @@ public class ResultSummarizer {
         logger.info("Current tag is :" + yagoWNID2Names.get(key) + "|||| Weight = " + weight);
         logger.info("Its valid parents are: " + parents_array.toString());
 
-        if (parents != null) {
+        if (parents_array != null) {
             for (String parent: parents_array) {
                 if (!parent.startsWith("<yago") && !parent.startsWith("owl:")){
                     recursivelyUpdate(parent, weight / parents_array.size());
