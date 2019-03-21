@@ -269,6 +269,8 @@ public class ResultSummarizer {
 
         // then get the parents of the keys
         HashSet<String> parents =  yagoWNID2Hypernyms.get(key);
+        logger.info("Current tag is :" + yagoWNID2Names.get(key) + "|||| Weight = " + weight);
+        logger.info("Its parents are: " + parents.toString());
         if (parents != null) {
             for (String parent: parents) {
                 if (!parent.startsWith("<yago") && !parent.startsWith("owl:")){
