@@ -217,11 +217,12 @@ public class ProcessBatchImageRunnable implements Runnable {
         summarizationWeight = new HashMap<>();
         summarizationCount = new HashMap<>();
 
-        for (String line: this.originalImgCatsArray) {
-            long startTime;
-            long endTime;
+        long startTime;
+        long endTime;
 
-            startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
+
+        for (String line: this.originalImgCatsArray) {
 
             synSetforImage.clear();
 
@@ -241,11 +242,11 @@ public class ProcessBatchImageRunnable implements Runnable {
             } catch (StackOverflowError ex) {
                 logger.error("SOF for line:" + line);
             }
-
-            endTime = System.currentTimeMillis();
-
-            logger.info("Finished processing one image. It takes " + (endTime - startTime));
         }
+
+        endTime = System.currentTimeMillis();
+
+        logger.info("Finished processing one batch images. It takes " + (endTime - startTime));
 
 
 
