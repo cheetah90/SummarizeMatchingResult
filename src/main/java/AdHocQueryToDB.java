@@ -75,11 +75,7 @@ public class AdHocQueryToDB {
         String query_yagotype;
 
         try {
-            if (PROPERTIES.getProperty("debugLocally").equals("true")) {
-                query_yagotype = "select * from yagotaxonomy where object = ? and subject LIKE '<wordnet_%';";
-            } else {
-                query_yagotype = "SELECT * FROM yagotaxonomy";
-            }
+            query_yagotype = "select * from yagotaxonomy where object = ? and subject LIKE '<wordnet_%';";
 
             stmt = yagoConnection.prepareStatement(query_yagotype);
             stmt.setString(1, "<wordnet_building_102913152>");
