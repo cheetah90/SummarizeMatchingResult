@@ -50,12 +50,6 @@ public class FilterLeafWordNetNode {
         return line.startsWith("<wordnet");
     }
 
-    private String extractWNID(String input) {
-        String[] splits = input.split("_");
-        String wnid = splits[splits.length-1];
-        return wnid.substring(0,wnid.length()-1);
-    }
-
     private void markNonLeafNodes(ResultSet rs) throws SQLException {
         while (rs.next()) {
             String subject = rs.getString("subject");
@@ -64,7 +58,7 @@ public class FilterLeafWordNetNode {
 
             if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
                 if (isWordNet(subject)) {
-                    nonLeafNode.add(extractWNID(object));
+                    nonLeafNode.add(IOUtilities.extractWNID(object));
                 }
             }
         }
@@ -77,8 +71,8 @@ public class FilterLeafWordNetNode {
             String predicate = rs.getString("predicate");
 
             if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
-                if (isWordNet(subject) && !nonLeafNode.contains(extractWNID(subject))) {
-                    leafNode.add(extractWNID(subject));
+                if (isWordNet(subject) && !nonLeafNode.contains(IOUtilities.extractWNID(subject))) {
+                    leafNode.add(IOUtilities.extractWNID(subject));
                 }
             }
         }

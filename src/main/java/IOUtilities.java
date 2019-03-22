@@ -85,6 +85,34 @@ public class IOUtilities {
         }
     }
 
+    static String extractWNID(String input) {
+        String[] splits = input.split("_");
+        String wnid = splits[splits.length-1];
+        return wnid.substring(0,wnid.length()-1);
+    }
+
+    static void writeHashSetToFile(HashSet<String> hashSet, String outputfilename){
+        IOUtilities.clearOutputfile(outputfilename);
+
+        BufferedWriter bw;
+        FileWriter fw;
+
+        try {
+            fw = new FileWriter(outputfilename);
+            bw = new BufferedWriter(fw);
+
+            for (String key: hashSet) {
+                String content = key + "\n";
+                bw.write(content);
+            }
+
+            bw.close();
+
+        } catch (IOException exception) {
+            logger.error("Error: can't create file: " + outputfilename);
+        }
+    }
+
     private static void loadEnWikiResultSet(ResultSet rs,
                                             HashMap<String, HashSet<String>> yagoWNID2Hypernyms,
                                             HashMap<String, String> yagoWNID2Names
