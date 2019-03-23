@@ -83,14 +83,13 @@ public class FindAllImagesUnderAWordnetSynset {
         }
     }
 
-    private void startWorking(){
-        String wordnetID = "<wordnet_location_100027167>";
+    private void startWorking(String wordnetID){
 
         findAllHyponyms(wordnetID);
 
         IOUtilities.writeHashSetToFile(hyponymsOfSynset, "output/tmp_allhyponyms.tsv");
 
-//        findAllImages();
+        findAllImages();
     }
 
     public static void main(String[] args){
@@ -104,7 +103,7 @@ public class FindAllImagesUnderAWordnetSynset {
         }
 
         FindAllImagesUnderAWordnetSynset produceAllWNunderBuilding = new FindAllImagesUnderAWordnetSynset();
-        produceAllWNunderBuilding.startWorking();
+        produceAllWNunderBuilding.startWorking(args[0]);
     }
 
 }
