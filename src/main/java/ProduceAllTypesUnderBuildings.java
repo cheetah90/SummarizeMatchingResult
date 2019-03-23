@@ -2,7 +2,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.sql.*;
 import java.util.*;
 
 public class ProduceAllTypesUnderBuildings {
@@ -63,13 +62,13 @@ public class ProduceAllTypesUnderBuildings {
                         List<String> regularTags = new ArrayList<>();
                         List<List<String>> parentTags = new ArrayList<>();
                         List<String> parentTags_flattened = new ArrayList<>();
-                        for (List<String> one_parenttag: parentTags) {
-                            parentTags_flattened.addAll(one_parenttag);
-                        }
                         IOUtilities.splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
+                        for (List<String> one_parent_tag: parentTags) {
+                            parentTags_flattened.addAll(one_parent_tag);
+                        }
 
                         if (containsHyponyms(regularTags) || containsHyponyms(parentTags_flattened)) {
-                            IOUtilities.appendLinetoFile(splits[1], output);
+                            IOUtilities.appendLinetoFile(a_line, output);
                         }
                     }
                 } catch (StackOverflowError ex) {
@@ -82,7 +81,6 @@ public class ProduceAllTypesUnderBuildings {
         } catch (IOException exception) {
             logger.error("filenames.txt does not exist!");
         }
-
     }
 
     private void startWorking(){
