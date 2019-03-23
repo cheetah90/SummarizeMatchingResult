@@ -59,6 +59,7 @@ public class ProduceAllTypesUnderBuildings {
                 }
             }
         }
+        logger.info("Finished finding types under building!");
     }
 
     private static boolean isValidObject(String typeInfo) {
