@@ -66,27 +66,6 @@ public class ResultSummarizer {
 
     }
 
-    private List<String> loadArrayListFromtoString(String strLine, String leftDelimiter, String rightDelimiter) {
-        strLine = strLine.substring(1,strLine.length()-1);
-
-        ArrayList<String> tagsList = new ArrayList<>();
-
-        String[] tagsParsed = strLine.split(rightDelimiter+", \\"+leftDelimiter);
-        for (String tag: tagsParsed) {
-            if (!tag.startsWith(leftDelimiter)) {
-                tag = leftDelimiter + tag;
-            }
-
-            if (!tag.endsWith(rightDelimiter)) {
-                tag = tag + rightDelimiter;
-            }
-
-            tagsList.add(tag);
-        }
-
-        return tagsList;
-    }
-
     private List<String> filterAllTags(List<String> tagsArray){
         ArrayList<String> validTags = new ArrayList<>();
 
@@ -113,29 +92,6 @@ public class ResultSummarizer {
             processOneTag(tag, sum_of_weights/(double) validTagsArray.size());
         }
 
-    }
-
-    private boolean isParentCats(String tag) {
-        return tag.startsWith("<[{");
-    }
-
-    private void splitRegularCatandParentCats(String tagsLine, List<String> regularCats, List<List<String>> parentCats){
-        tagsLine = tagsLine.substring(1,tagsLine.length()-1);
-
-        List<String> tagsArray = loadArrayListFromtoString(tagsLine, "<", ">");
-
-        for (String tag: tagsArray) {
-            if (isParentCats(tag)) {
-                tag = tag.substring(1,tag.length()-1);
-                List<String> new_parentTags = new ArrayList<>();
-                for (String parTag: loadArrayListFromtoString(tag, "{", "}")) {
-                    new_parentTags.add(parTag.replace('{', '<').replace('}', '>'));
-                }
-                parentCats.add(new_parentTags);
-            } else {
-                regularCats.add(tag);
-            }
-        }
     }
 
     private void processOneTag(String tag, Double weight) {
@@ -268,7 +224,7 @@ public class ResultSummarizer {
                         String tagsLine = splits[1];
                         List<String> regularTags = new ArrayList<>();
                         List<List<String>> parentTags = new ArrayList<>();
-                        splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
+                        IOUtilities.splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
 
                         //Process regular tags
                         double weights_regularTags = ((double) regularTags.size()) / (regularTags.size() + parentTags.size());

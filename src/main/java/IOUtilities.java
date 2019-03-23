@@ -3,9 +3,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Properties;
+import java.util.*;
 
 public class IOUtilities {
 
@@ -268,6 +266,50 @@ public class IOUtilities {
             }
         }
 
+    }
+
+    static List<String> loadArrayListFromtoString(String strLine, String leftDelimiter, String rightDelimiter) {
+        strLine = strLine.substring(1,strLine.length()-1);
+
+        ArrayList<String> tagsList = new ArrayList<>();
+
+        String[] tagsParsed = strLine.split(rightDelimiter+", \\"+leftDelimiter);
+        for (String tag: tagsParsed) {
+            if (!tag.startsWith(leftDelimiter)) {
+                tag = leftDelimiter + tag;
+            }
+
+            if (!tag.endsWith(rightDelimiter)) {
+                tag = tag + rightDelimiter;
+            }
+
+            tagsList.add(tag);
+        }
+
+        return tagsList;
+    }
+
+    static boolean isParentCats(String tag) {
+        return tag.startsWith("<[{");
+    }
+
+    static void splitRegularCatandParentCats(String tagsLine, List<String> regularCats, List<List<String>> parentCats){
+        tagsLine = tagsLine.substring(1,tagsLine.length()-1);
+
+        List<String> tagsArray = loadArrayListFromtoString(tagsLine, "<", ">");
+
+        for (String tag: tagsArray) {
+            if (isParentCats(tag)) {
+                tag = tag.substring(1,tag.length()-1);
+                List<String> new_parentTags = new ArrayList<>();
+                for (String parTag: loadArrayListFromtoString(tag, "{", "}")) {
+                    new_parentTags.add(parTag.replace('{', '<').replace('}', '>'));
+                }
+                parentCats.add(new_parentTags);
+            } else {
+                regularCats.add(tag);
+            }
+        }
     }
 
     static void loadYagoHyponymToMemory(HashMap<String, HashSet<String>> entity2Hyponyms) {

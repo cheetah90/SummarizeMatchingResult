@@ -1,13 +1,9 @@
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Properties;
+import java.util.*;
 
 public class ProduceAllTypesUnderBuildings {
 
@@ -34,12 +30,69 @@ public class ProduceAllTypesUnderBuildings {
         }
     }
 
+    private boolean containsHyponyms(List<String> tags) {
+        for (String tag: tags) {
+            if (childrenOfBuilding.contains(tag)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void findAllImages() {
+        String fileInput = "output/replaced_entities_per_img_parcat.tsv";
+        String output = "output/images_under_node.tsv";
+        IOUtilities.clearOutputfile(output);
+
+        try {
+            // Buffered read the file
+            BufferedReader br = new BufferedReader(new FileReader(fileInput));
+            String a_line;
+            int line_counter = 0;
+
+            while ((a_line = br.readLine()) != null) {
+                if (line_counter % 10000 == 0) {
+                    logger.info("Finished processing: " + line_counter);
+                }
+
+                try {
+                    String[] splits = a_line.split("\t");
+                    if (splits.length == 3) {
+                        String tagsLine = splits[2];
+                        List<String> regularTags = new ArrayList<>();
+                        List<List<String>> parentTags = new ArrayList<>();
+                        List<String> parentTags_flattened = new ArrayList<>();
+                        for (List<String> one_parenttag: parentTags) {
+                            parentTags_flattened.addAll(one_parenttag);
+                        }
+                        IOUtilities.splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
+
+                        if (containsHyponyms(regularTags) || containsHyponyms(parentTags_flattened)) {
+                            IOUtilities.appendLinetoFile(splits[1], output);
+                        }
+                    }
+                } catch (StackOverflowError ex) {
+                    logger.error("SOF for line:" + a_line);
+                }
+
+                line_counter++;
+            }
+
+        } catch (IOException exception) {
+            logger.error("filenames.txt does not exist!");
+        }
+
+    }
+
     private void startWorking(){
         String wordnetID = "<wordnet_theologian_110705615>";
 
         findAllHyponyms(wordnetID);
 
-        IOUtilities.writeHashSetToFile(childrenOfBuilding, "output/allEntitiesOfBuilding.tsv");
+        findAllImages();
+
+        IOUtilities.writeHashSetToFile(childrenOfBuilding, "output/tmp_allhyponyms.tsv");
     }
 
     public static void main(String[] args){
