@@ -4,15 +4,15 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.util.*;
 
-public class ProduceAllTypesUnderBuildings {
+public class FindAllImagesUnderAWordnetSynset {
 
     private static final Logger logger = LogManager.getLogger(ResultSummarizer.class);
 
-    private HashSet<String> childrenOfBuilding = new HashSet<>();
+    private HashSet<String> hyponymsOfSynset = new HashSet<>();
 
     private HashMap<String, HashSet<String>> entity2Hyponyms = new HashMap<>();
 
-    private ProduceAllTypesUnderBuildings(){
+    private FindAllImagesUnderAWordnetSynset(){
         IOUtilities.loadYagoHyponymToMemory(entity2Hyponyms);
     }
 
@@ -21,7 +21,7 @@ public class ProduceAllTypesUnderBuildings {
         logger.info("Find children: " + hyponyms.toString());
 
         for (String one_hyponym: hyponyms) {
-            childrenOfBuilding.add(one_hyponym);
+            hyponymsOfSynset.add(one_hyponym);
 
             if (entity2Hyponyms.containsKey(one_hyponym)) {
                 findAllHyponyms(one_hyponym);
@@ -31,7 +31,7 @@ public class ProduceAllTypesUnderBuildings {
 
     private boolean containsHyponyms(List<String> tags) {
         for (String tag: tags) {
-            if (childrenOfBuilding.contains(tag)) {
+            if (hyponymsOfSynset.contains(tag)) {
                 return true;
             }
         }
@@ -84,13 +84,13 @@ public class ProduceAllTypesUnderBuildings {
     }
 
     private void startWorking(){
-        String wordnetID = "<wordnet_theologian_110705615>";
+        String wordnetID = "<wordnet_location_100027167>";
 
         findAllHyponyms(wordnetID);
 
-        findAllImages();
+        IOUtilities.writeHashSetToFile(hyponymsOfSynset, "output/tmp_allhyponyms.tsv");
 
-        IOUtilities.writeHashSetToFile(childrenOfBuilding, "output/tmp_allhyponyms.tsv");
+//        findAllImages();
     }
 
     public static void main(String[] args){
@@ -103,7 +103,7 @@ public class ProduceAllTypesUnderBuildings {
             return;
         }
 
-        ProduceAllTypesUnderBuildings produceAllWNunderBuilding = new ProduceAllTypesUnderBuildings();
+        FindAllImagesUnderAWordnetSynset produceAllWNunderBuilding = new FindAllImagesUnderAWordnetSynset();
         produceAllWNunderBuilding.startWorking();
     }
 
