@@ -322,7 +322,7 @@ public class IOUtilities {
                 String query_yagotaxonomy = "SELECT * FROM YAGOTAXONOMY";
                 stmt = yagoConnection.prepareStatement(query_yagotaxonomy);
                 rs = stmt.executeQuery();
-                loadYaogHyponymFromForeignResultSet(rs, entity2Hyponyms);
+                loadYaogHyponymFromResultSet(rs, entity2Hyponyms);
                 rs.close();
                 stmt.close();
             }
