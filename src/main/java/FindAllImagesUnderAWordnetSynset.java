@@ -102,6 +102,7 @@ public class FindAllImagesUnderAWordnetSynset {
             return;
         }
 
+        System.out.println(args[0]);
         FindAllImagesUnderAWordnetSynset produceAllWNunderBuilding = new FindAllImagesUnderAWordnetSynset();
         produceAllWNunderBuilding.startWorking(args[0]);
     }
