@@ -23,10 +23,10 @@ public class ProduceAllTypesUnderBuildings {
 
     private void findAllHyponyms(String yagoEntity) {
         HashSet<String> hyponyms = entity2Hyponyms.get(yagoEntity);
+        logger.info("Find children: " + hyponyms.toString());
 
         for (String one_hyponym: hyponyms) {
             childrenOfBuilding.add(one_hyponym);
-            logger.info("Find children: " + yagoEntity);
 
             if (entity2Hyponyms.containsKey(one_hyponym)) {
                 findAllHyponyms(one_hyponym);
