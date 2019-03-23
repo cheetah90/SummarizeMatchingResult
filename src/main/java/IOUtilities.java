@@ -226,6 +226,114 @@ public class IOUtilities {
         return "<wordnet_" + yagoWNID2Names.get(WNID) + WNID + ">";
     }
 
+    private static void loadYaogHyponymFromResultSet(ResultSet rs,
+                                             HashMap<String, HashSet<String>> entity2Hyponyms) throws SQLException{
+        while (rs.next()) {
+            String subject = rs.getString("subject");
+            String object = rs.getString("object");
+            String predicate = rs.getString("predicate");
+
+            if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
+                if (entity2Hyponyms.containsKey(object)) {
+                    entity2Hyponyms.get(object).add(subject);
+                } else {
+                    HashSet<String> hyponyms = new HashSet<>();
+                    hyponyms.add(subject);
+                    entity2Hyponyms.put(object, hyponyms);
+                }
+            }
+        }
+    }
+
+    private static void loadYaogHyponymFromForeignResultSet(ResultSet rs,
+                                                    HashMap<String, HashSet<String>> entity2Hyponyms) throws SQLException {
+        while (rs.next()) {
+            String subject = rs.getString("subject");
+            String object = rs.getString("object");
+            String predicate = rs.getString("predicate");
+
+            if (isValidObject(object) && subject != null && !(predicate.equals("rdf:redirect") && subject.toLowerCase().equals(object.toLowerCase()))){
+                // If this is a multilingual word
+                if (subject.length() > 5 && subject.substring(1,4).matches("[a-zA-Z]{2}/")) {
+                    String strip_subject = "<"+subject.substring(4);
+
+                    if (entity2Hyponyms.containsKey(object)) {
+                        entity2Hyponyms.get(object).add(strip_subject);
+                    } else {
+                        HashSet<String> hyponyms = new HashSet<>();
+                        hyponyms.add(strip_subject);
+                        entity2Hyponyms.put(object, hyponyms);
+                    }
+                }
+            }
+        }
+
+    }
+
+    static void loadYagoHyponymToMemory(HashMap<String, HashSet<String>> entity2Hyponyms) {
+        try {
+            if (PROPERTIES == null) {
+                try {
+                    PROPERTIES = new Properties();
+                    //Load properties file
+                    PROPERTIES.load(new InputStreamReader(new FileInputStream("./src/main/resources/config.properties"), "UTF8"));
+                } catch (IOException exception) {
+                    return;
+                }
+            }
+
+
+            Connection yagoConnection = DriverManager.getConnection("jdbc:postgresql://localhost:"+PROPERTIES.getProperty("db4Yago.port")+"/"+PROPERTIES.getProperty("db4Yago.name"),
+                    PROPERTIES.getProperty("db4Yago.username"), PROPERTIES.getProperty("db4Yago.password"));
+
+            PreparedStatement stmt;
+
+            // local debug mode: only load subset of types
+            if (PROPERTIES.getProperty("debugLocally").equals("true")) {
+                String query_yagotype = "SELECT * FROM subset_yagotypes";
+                stmt = yagoConnection.prepareStatement(query_yagotype);
+                ResultSet rs = stmt.executeQuery();
+                //Load the resultset
+                loadYaogHyponymFromResultSet(rs, entity2Hyponyms);
+                rs.close();
+                stmt.close();
+
+            } else {
+                // load all dataset
+                // 1) load the enwiki yagotypes
+                String query_yagotype = "SELECT * FROM yagotypes_enwiki";
+                stmt = yagoConnection.prepareStatement(query_yagotype);
+                ResultSet rs = stmt.executeQuery();
+                //Load the resultset
+                loadYaogHyponymFromResultSet(rs, entity2Hyponyms);
+                rs.close();
+                stmt.close();
+
+                // 2) load the foreign yagotypes
+                query_yagotype = "SELECT * FROM yagotypes_foreignwiki";
+                stmt = yagoConnection.prepareStatement(query_yagotype);
+                rs = stmt.executeQuery();
+                //Load the resultset
+                loadYaogHyponymFromForeignResultSet(rs, entity2Hyponyms);
+                rs.close();
+                stmt.close();
+
+                // 3 Load the yagotaxonomy
+                String query_yagotaxonomy = "SELECT * FROM YAGOTAXONOMY";
+                stmt = yagoConnection.prepareStatement(query_yagotaxonomy);
+                rs = stmt.executeQuery();
+                loadYaogHyponymFromForeignResultSet(rs, entity2Hyponyms);
+                rs.close();
+                stmt.close();
+            }
+
+            logger.info("Finished loading yago to memory!");
+
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+    }
+
     static void loadYagotoMemory(HashMap<String,HashSet<String>> yagoWNID2Hypernyms,
                                  HashMap<String, String> yagoWNID2Names){
 
