@@ -35,7 +35,7 @@ public class ProduceAllTypesUnderBuildings {
     }
 
     private void startWorking(){
-        String wordnetID = "<wordnet_building_102913152>";
+        String wordnetID = "<wordnet_theologian_110705615>";
 
         findAllHyponyms(wordnetID);
 
