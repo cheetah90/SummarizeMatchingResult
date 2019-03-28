@@ -89,7 +89,7 @@ public class FindAllImagesUnderAWordnetSynset {
 
         IOUtilities.writeHashSetToFile(hyponymsOfSynset, "output/tmp_allhyponyms.tsv");
 
-        findAllImages();
+//        findAllImages();
     }
 
     public static void main(String[] args){
