@@ -203,7 +203,7 @@ public class ResultSummarizer {
     }
 
     private void startSummarization(){
-        String fileInput = "./output/replaced_entities_per_img_parcat.tsv";
+        String fileInput = "./data/replaced_entities_per_img_parcat.tsv";
         int line_counter = 0;
 
         try {
@@ -220,8 +220,8 @@ public class ResultSummarizer {
 
                 try {
                     String[] splits = a_line.split("\t");
-                    if (splits.length == 2) {
-                        String tagsLine = splits[1];
+                    if (splits.length == 3) {
+                        String tagsLine = splits[2];
                         List<String> regularTags = new ArrayList<>();
                         List<List<String>> parentTags = new ArrayList<>();
                         IOUtilities.splitRegularCatandParentCats(tagsLine, regularTags, parentTags);
