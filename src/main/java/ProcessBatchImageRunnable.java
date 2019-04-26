@@ -34,10 +34,6 @@ public class ProcessBatchImageRunnable implements Runnable {
 
 
 
-
-
-
-
     ProcessBatchImageRunnable(ArrayList<String> originalImageCatsArray) {
         this.originalImgCatsArray = originalImageCatsArray;
     }
