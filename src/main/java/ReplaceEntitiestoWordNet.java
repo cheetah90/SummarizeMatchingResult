@@ -41,7 +41,7 @@ public class ReplaceEntitiestoWordNet {
         strLine = strLine.substring(1,strLine.length()-1);
 
         ArrayList<String> tagsList = new ArrayList<>();
-        String delimiter = rightDelimiter+ ", \\" +leftDelimiter;
+        String delimiter = rightDelimiter + ", \\" + leftDelimiter;
         String[] tagsParsed = strLine.split(delimiter);
         for (String tag: tagsParsed) {
             if (!tag.startsWith(leftDelimiter)) {
@@ -71,12 +71,18 @@ public class ReplaceEntitiestoWordNet {
         String fileName="";
 
         try {
-            // Read context-location tags
+            // Read output file
             fileName = "./data/output_per_img_parcat.tsv";
             BufferedReader br = new BufferedReader(new FileReader(fileName));
 
+            int counter = 0;
+
             while ((line = br.readLine()) != null) {
-                // process the line.
+                if (counter % 100000 == 0 ) {
+                    logger.info("Finished processing line: " + counter);
+                }
+
+                // process the linee
 
                 String[] rawArray = line.split("\t");
                 if (rawArray.length == 3) {
@@ -111,6 +117,8 @@ public class ReplaceEntitiestoWordNet {
                     String strOutputLine = rawArray[0]+"\t"+rawArray[1]+"\t" + new_tagsArray.toString();
 
                     IOUtilities.appendLinetoFile(strOutputLine, outputFileName);
+
+                    counter ++;
                 } else {
                     logger.error("Error: this line is malformated." + line);
                 }
