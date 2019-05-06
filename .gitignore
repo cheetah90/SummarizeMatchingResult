@@ -3,8 +3,12 @@ SummarizeWordNet.iml
 
 target/
 
+# input files
+input/
+output_per_img_parcat.tsv
+
+
 # results files
-data/
 logs.log
 context-location-tags.txt
 context-time-tags.txt

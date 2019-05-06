@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class ReplaceEntitiestoWordNet {
 
-    private static final Logger logger = LogManager.getLogger(ResultSummarizer.class);
+    private static final Logger logger = LogManager.getLogger(ReplaceEntitiestoWordNet.class);
 
     private static final Properties PROPERTIES = new Properties();
 
@@ -72,7 +72,7 @@ public class ReplaceEntitiestoWordNet {
 
         try {
             // Read output file
-            fileName = "./data/output_per_img_parcat.tsv";
+            fileName = "./output_per_img_parcat.tsv";
             BufferedReader br = new BufferedReader(new FileReader(fileName));
 
             int counter = 0;
@@ -82,7 +82,7 @@ public class ReplaceEntitiestoWordNet {
                     logger.info("Finished processing line: " + counter);
                 }
 
-                // process the linee
+                // process the line
 
                 String[] rawArray = line.split("\t");
                 if (rawArray.length == 3) {
