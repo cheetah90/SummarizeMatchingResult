@@ -6,7 +6,7 @@ target/
 # input files
 input/
 output_per_img_parcat.tsv
-
+content_tags.tsv
 
 # results files
 logs.log

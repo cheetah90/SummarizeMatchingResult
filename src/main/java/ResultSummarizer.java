@@ -19,8 +19,6 @@ public class ResultSummarizer {
 
     private final static HashMap<String, Integer> summaryCount = new HashMap<>();
 
-    private final static HashSet<String> contextTags = new HashSet<>();
-
     private HashSet<String> synSetforImage = new HashSet<>();
 
 
@@ -53,13 +51,6 @@ public class ResultSummarizer {
                 logger.error("Error - tag does not exist: " + tag);
             }
             return false;
-        }
-
-        // If it's a context tag, it's bad
-        if (IOUtilities.PROPERTIES.getProperty("excludeContextTags").equals("true")) {
-            if (contextTags.contains(tag)) {
-                return false;
-            }
         }
 
         return true;
@@ -106,7 +97,7 @@ public class ResultSummarizer {
             if (!synSetforImage.contains(tag)) {
                 updateSummaryCount(tag);
             }
-            updateSummaryWeight(tag, weight);
+//            updateSummaryWeight(tag, weight);
 
             // Add this synset to hash set
             synSetforImage.add(tag);
@@ -159,11 +150,7 @@ public class ResultSummarizer {
 
         IOUtilities.loadYagotoMemory(yagoWNID2Hypernyms, yagoWNID2Names);
 
-        IOUtilities.loadContextTagstoMemory(contextTags);
-
         ProcessBatchImageRunnable.setyagoWNID2Hypernyms(yagoWNID2Hypernyms);
-
-        ProcessBatchImageRunnable.setcontextTags(contextTags);
 
     }
 
@@ -203,7 +190,7 @@ public class ResultSummarizer {
     }
 
     private void startSummarization(){
-        String fileInput = "./data/replaced_entities_per_img_parcat.tsv";
+        String fileInput = "content_tags.tsv";
         int line_counter = 0;
 
         try {
