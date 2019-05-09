@@ -190,7 +190,7 @@ public class ResultSummarizer {
     }
 
     private void startSummarization(){
-        String fileInput = "content_tags.tsv";
+        String fileInput = "./content_tags.tsv";
         int line_counter = 0;
 
         try {
@@ -228,7 +228,7 @@ public class ResultSummarizer {
             }
 
         } catch (IOException exception) {
-            logger.error("filenames.txt does not exist!");
+            logger.error(fileInput + "does not exist!");
         }
 
     }
