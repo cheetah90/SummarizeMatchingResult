@@ -15,22 +15,49 @@ public class FindAllHyponymsUnderAWordnetSynset {
         IOUtilities.loadYagoHyponymToMemory(entity2Hyponyms);
     }
 
-    private void findAllHyponyms(String yagoEntity) {
+    private boolean isWordNetLeafNode(String one_yagoentity){
+        if (! one_yagoentity.startsWith("<wordnet_")) {return false;}
+
+        // does not have children
+        if (! entity2Hyponyms.containsKey(one_yagoentity)) {
+            return true;
+        }
+
+        // none of its children start with wordnet
+        HashSet<String> hyponyms = entity2Hyponyms.get(one_yagoentity);
+        for (String one_hyponym: hyponyms) {
+            if (one_hyponym.startsWith("<wordnet_")) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void findAllHyponyms(String yagoEntity, boolean onlyLeafWordnetNode) {
         HashSet<String> hyponyms = entity2Hyponyms.get(yagoEntity);
         logger.info("Find children: " + hyponyms.toString());
 
         for (String one_hyponym: hyponyms) {
-            hyponymsOfSynset.add(one_hyponym);
+            if (onlyLeafWordnetNode) {
+                // look ahead to check if this is a leafnode
+                if (isWordNetLeafNode(one_hyponym)){
+                    hyponymsOfSynset.add(one_hyponym);
+                }
+            }
+            else {
+                hyponymsOfSynset.add(one_hyponym);
+            }
 
             if (entity2Hyponyms.containsKey(one_hyponym)) {
-                findAllHyponyms(one_hyponym);
+                findAllHyponyms(one_hyponym, onlyLeafWordnetNode);
             }
         }
     }
 
-    private void startWorking(String wordnetID){
+    private void startWorking(String wordnetID, boolean onlyLeafWordnetNode){
 
-        findAllHyponyms(wordnetID);
+        findAllHyponyms(wordnetID, onlyLeafWordnetNode);
 
         IOUtilities.writeHashSetToFile(hyponymsOfSynset, "output/tmp_allhyponyms.tsv");
     }
@@ -47,7 +74,8 @@ public class FindAllHyponymsUnderAWordnetSynset {
 
         System.out.println(args[0]);
         FindAllHyponymsUnderAWordnetSynset produceAllWNunderBuilding = new FindAllHyponymsUnderAWordnetSynset();
-        produceAllWNunderBuilding.startWorking(args[0]);
+        boolean onlyLeafWordnetNode = args[1].equals("true");
+        produceAllWNunderBuilding.startWorking(args[0], onlyLeafWordnetNode);
     }
 
 }
